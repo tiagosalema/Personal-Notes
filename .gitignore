@@ -6,11 +6,15 @@ node_modules/
 layout.md
 *.env
 
-
 *.pdf
+*.ini
 
 Advanced_React/
 React/Practice/
 mosh/
 Personal/
 Modern_React_with_Redux/
+
+My Music/
+My Pictures/
+My Videos/
