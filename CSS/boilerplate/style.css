@@ -1,0 +1,23 @@
+h1::before {
+  content: "extra small";
+}
+@media (min-width: 576px) {
+  h1::before {
+    content: "small";
+  }
+}
+@media (min-width: 768px) {
+  h1::before {
+    content: "medium  ";
+  }
+}
+@media (min-width: 992px) {
+  h1::before {
+    content: "big";
+  }
+}
+@media (min-width: 1200px) {
+  h1::before {
+    content: "extra big";
+  }
+}

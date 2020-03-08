@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Trying jQuery</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <button id="button1" data-panelid="#panel1" class="btn btn-primary">Button 1</button>
+    <button id="button2" data-panelid="#panel2" class="btn btn-primary">Button 2</button>
+    <button id="button3" data-panelid="#panel3" class="btn btn-primary">Button 3</button>
+    <button id="button4" data-panelid="#panel4" class="btn btn-primary">Button 4</button>
+    <div class="mt-3">
+      <div id="panel1" style="display:none" class="ml-2 box">BOX 1</div>
+      <div id="panel2" style="display:none" class="ml-2 box">BOX 2</div>
+      <div id="panel3" style="display:none" class="ml-2 box">BOX 3</div>
+      <div id="panel4" style="display:none" class="ml-2 box">BOX 4</div>
+    </div>
+  </body>
+  <script
+    src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+    crossorigin="anonymous"
+  ></script>
+  <script>
+    $(function() {
+      $("button").on("mouseover", function() {
+        const panelId = $(this).attr("data-panelId");
+        $(panelId).toggle();
+      });
+    });
+  </script>
+</html>

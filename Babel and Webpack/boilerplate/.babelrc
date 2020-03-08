@@ -1,0 +1,2 @@
+{ "presets": ["babel-preset-env", "react"] }
+// we installed 2 presets as devDependencies: babel-preset-env and babel-preset-react. We are telling babel in this file that these are the ones.

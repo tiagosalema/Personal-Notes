@@ -1,0 +1,16 @@
+node_modules/
+.DS_Store
+*.log
+.next/
+.build/
+layout.md
+*.env
+
+
+*.pdf
+
+Advanced_React/
+React/Practice/
+mosh/
+Personal/
+Modern_React_with_Redux/
