@@ -16,7 +16,7 @@ Logarithmic notation means that duplicating the sample amount will result in one
 
 # Algorithms
 
-## Sorting Algorithms
+## Sort
 
 ### Bubble sort - O(n^2)
 
@@ -45,11 +45,11 @@ Notice that after the first loop, the largest number will be at the right of the
 ### Quicksort 
 
 + Time - O(n^2) - for the worst pivot selection
-+ Spacious complexity - O(n)
++ Spacious complexity - O(n) - it's space efficient, since the data is sorted in place i.e. the data is put into the original list that it came from, but in a sorted way.
 
 Since it's  recursive, the worst case scenario is building a stack as big as the number of items in the list.
 
-1. Select an item from the list (the pivot)
+1. Select an item from the list (the pivot). It can be the left-most item of the list.
 2. Loop through the rest of the list, sending the smaller items to the left of the pivot and the bigger ones to the right
 3. For both sub-lists, repeat from 1. (recursive)
 4. Finish when all sub-list have length = 1.
@@ -58,7 +58,7 @@ The worst-case scenario is sorting an ordered list and always taking the left-mo
 
 
 
-## Searching algorithms
+## Search
 
 ### Binary search - O(log n)
 
@@ -68,6 +68,26 @@ If the data is already sorted:
    + If the element is smaller than ours, discard all elements to its left.
    + Discard all the elements to its right otherwise.
 2. Repeat until the list is just one element.
+
+## Shortest path
+
+### Dijkstra’s Algorithm
+
++ Greedy algorithm because it visits the next vertex with the smallest known distance from the start vertex (we could select any, but selecting the closest one to the start we will presumably get to the end more quickly). This is desirable if we intend to find the shortest path from a starting point to all of the others.
+
+[This](https://www.youtube.com/watch?v=pVfj6mxhdMw&list=PLTd6ceoshprdS7HVI-Yus4rAHtrqNzH0j&index=20) video explains how to apply this algorithm.
+
+### A* Pathfinding Algorithm
+
++ It's an enhancement of Dijkstra’s algorithm, but potentially more efficient.
++ Better choice when we want to find the closest path between **2 particular vertices**.
++ Ideally won't visit all vertices
++ Picks the most promising node based on heuristics i.e. a previous estimation of how far that node is to the destination node
++ The better the heuristics for all nodes, the faster the path is going to be found
++ The heuristic is problem specific
++ Will always find a solution, if it exists
+
+[This](https://www.youtube.com/watch?v=eSOJ3ARN5FM&list=PLTd6ceoshprdS7HVI-Yus4rAHtrqNzH0j&index=22) video explains how to apply this algorithm.
 
 # Data Structures
 
@@ -106,13 +126,13 @@ Each node will have an id and a pair of numbers:
 
 ### AVL Tree
 
-#### Single rotation
+[How to apply rotations.](https://www.youtube.com/watch?v=jDM6_TnYIqE)
 
-#### Double rotation
+### Red-Black Tree
+
+Not as strict as AVL tree.
 
 ## Hash table
-
-
 
 # Programming Paradigms
 
