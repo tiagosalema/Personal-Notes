@@ -517,3 +517,63 @@ The second line of execution will trigger the automation mentioned in the `new` 
 
 ## Imperative programming
 
+
+
+# Others
+
+## Tags @param and @return
+
+Only intended to document functions.
+
+### @params
+
+All these 3 are valid:
+
++ argument name
+
+```js
+/**
+ * @param firstFunctionInput
+ */
+```
+
++ ...with type
+
+```js
+/**
+ * @param {string} firstFunctionInput
+ */
+```
+
++ ...and description
+
+```js
+/**
+ * @param {string} firstFunctionInput - This is text will be visible when the function will be called
+ */
+```
+
+If the argument is an object, it is possible to document its properties:
+
+```javascript
+/**
+ * @param {Object} employee - The employee who is responsible for the project.
+ * @param {string} employee.name - The name of the employee.
+ * @param {string} employee.department - The employee's department.   
+*/
+```
+
+
+
+## @return
+
+```js
+/**
+ * @param {number} a
+ * @param {number} b
+ * @returns {number} Sum of a and b
+ */
+function sum(a, b) {
+    return a + b;
+}
+```
