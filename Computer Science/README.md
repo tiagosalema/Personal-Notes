@@ -104,6 +104,16 @@ Types of nodes:
 + Root node - the first one i.e. the one at the top
 + Terminal / leaf node - have no children
 
+There is an interesting relation between the nodes and their position in the sorted array. For an item with index `i`:
+
++ its left child node has index `2i`
++ its right child node has index `2i + 1`
++ its parent node has index `i / 2` 
+
+In OOP, each node will be built as `{ node_id, { left_child_id, right_child_id } }`. If the node has no left / right child, their ids will be 0.
+
+### Binary Search Tree
+
 How to construct a tree:
 
 1. Place the first element at the top.
@@ -114,21 +124,58 @@ How to construct a tree:
    + If it goes to an empty position, place it there
    + Recursive if otherwise
 
-Each node will have an id and a pair of numbers:
+### Heap
 
-+ `{ 0, 0 }` if it has no children
+It's possible to organize a tree in a way that a node is bigger (max heap) or smaller (min heap) than both children. There is no rule as to which child should be placed on the left / right.
 
-+ `{ id_left, 0 }` if it has a left child with id `id_left` 
+#### Heap creation
 
-+ etc.
+For each item of the array:
 
-  
+1. Insert the leaf at t (leafs are inserted from left to right)
+
+#### Node deletion
+
+The standard element to be deleted on heap is the element at the root node. That means that the element being deleted will be the maximum if it's a max heap, and the minimum element if it's a min heap.
+
+The last element of the tree will be put into the root. Then, if necessary, it will be swapped by one of the childs so that it continues being max / min heap. Continue swapping with the new children until it is the heap it originally was.
 
 ### AVL Tree
 
-[How to apply rotations.](https://www.youtube.com/watch?v=jDM6_TnYIqE)
+![img](https://camo.githubusercontent.com/fa696e8874d67cb7b8a4af1bf8ea37d4f27106ce/68747470733a2f2f75706c6f61642e77696b696d656469612e6f72672f77696b6970656469612f636f6d6d6f6e732f662f66642f41564c5f547265655f4578616d706c652e676966)
+
++ named after Adelson-Velsky and Landis
++ self-balancing binary search tree
++ the heights of the two child subtrees of any node differ by at most one
++ if they differ by more than one, rebalancing is done. Lookup, insertion, and deletion all take `O(log n)` time in both the average and worst cases, where n is the number of nodes in the tree prior to the operation. Insertions and deletions may require the tree to be rebalanced by one or more tree rotations.
+
+
+
+#### Rotations
+
+##### LL
+
+![Left-Left Rotation](https://camo.githubusercontent.com/3478d784c4f30116de0b370dd24e4add6706814f/687474703a2f2f6274656368736d617274636c6173732e636f6d2f646174615f737472756374757265732f64735f696d616765732f4c4c253230526f746174696f6e2e706e67)
+
+##### RR
+
+![Right-Right Rotation](https://camo.githubusercontent.com/13537dc13be798a9fc6450dd576ae1ce3af9e5ba/687474703a2f2f6274656368736d617274636c6173732e636f6d2f646174615f737472756374757265732f64735f696d616765732f5252253230526f746174696f6e2e706e67)
+
+##### RL
+
+![Right-Right Rotation](https://camo.githubusercontent.com/7aa5ad4d208218243223ef54a68d1496cd14cc6e/687474703a2f2f6274656368736d617274636c6173732e636f6d2f646174615f737472756374757265732f64735f696d616765732f524c253230526f746174696f6e2e706e67)
+
+
+
+[Video illustrating how to apply rotations](https://www.youtube.com/watch?v=jDM6_TnYIqE)
 
 ### Red-Black Tree
+
+### Segment Tree
+
+Fenwick Tree
+
+
 
 Not as strict as AVL tree.
 
