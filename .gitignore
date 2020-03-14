@@ -5,17 +5,3 @@ node_modules/
 .build/
 layout.md
 *.env
-
-*.pdf
-*.ini
-
-Advanced_React/
-React/Practice/
-mosh/
-Personal/
-Modern_React_with_Redux/
-amplifyagora/
-
-My Music/
-My Pictures/
-My Videos/

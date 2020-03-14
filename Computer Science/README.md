@@ -183,17 +183,99 @@ Not as strict as AVL tree.
 
 # Programming Paradigms
 
-## Object Oriented Programming (OOP)
++ Imperative programming (C, C++, Java, Fortran)
+  + Procedural programming
+  + Object-oriented programming
+  + Parallel computing
+    + Bit-level parallelism
++ Declarative programming (HTML, React, Regex)
++ Functional programming
++ Logic programming
++ Structured programming
++ Generic programming
++ Encapsulation
++ Modular programming
+  + Concurrent computing
+    + Actor model
++ Event-driven programming
++ Comparison of multi-paradigm programming languages
++ Reactive programming
++ Aspect-oriented programming
++ Data-driven programming
++ Visual programming language
++ Lazy evaluation
++ Prototype-based programming
++ Dynamic programming language
++ Function-level programming
++ Stack-oriented programming
++ Role-oriented programming
++ Concatenative programming language
++ Array programming
++ Agent-oriented programming
++ Type inference
++ Dataflow programming
++ Markup language
++ Multi-agent system
++ Interpreted language
++ Compiled language
++ Design by contract
++ Dependent type
++ Combinatory logic
++ Stream processing
++ Self-modifying code
++ Strong typing
++ Knowledge-based systems
++ Educational programming language
++ Operator
++ Web framework
 
-## Functional Programming
+## OOP vs. FP
 
-### Map
+One main difference between functional programming (FP) and object-oriented programming (OOP) is the way abstraction is applied. A common practice in OOP is to limit abstraction to the strict useful minimum for the problem at hand. In OOP, premature abstraction is often considered a fault, much as premature optimization.
 
-### Reduce
+In FP, on the other hand, abstraction is generally pushed as far as possible. Every problem is broken into a series of the simplest possible functions, which are then composed to build the problem solution. Identifying these abstractions is generally the most important part of problem resolution. In fact, FP programmers often spend more time trying to find what problem they should solve than solving them. And of course, it generally appears that these functions are the same from one problem to the next. Only the way they are composed is different. This is the reason why abstraction is one of the most valued techniques used by FP programmers.
 
-### Filter
+## FP
 
+A subset of declarative programming. Uses functions like `.map`, `.reduce` and `.filter`.
 
+## Declarative vs. Imperative programming
+
+Imperative programming is like *how* you do something, and declarative programming is more like *what* you do.
+
+**An imperative approach (HOW)**: “I see that table located under the Gone Fishin’ sign is empty. My husband and I are going to walk over there and sit down.”
+
+**A declarative approach (WHAT)**: “Table for two, please.”
+
+The imperative approach is concerned with **HOW** you’re actually going to get a seat. You need to list out the steps to be able to show **HOW** you’re going to get a table. The declarative approach is more concerned with **WHAT** you want, a table for two.
+
+“I’m right next to Wal-Mart. How do I get to your house from here?”
+
+**Imperative response**: Go out of the north exit of the parking lot and take a left. Get on I-15 North until you get to the 12th street exit. Take a right off the exit like you’re going to Ikea. Go straight and take a right at the first light. Continue through the next light then take your next left. My house is #298.
+
+**Declarative response**: My address is 298 West Immutable Alley, Eden, Utah 84310
+
+For the declarative paradigm, it was assumed that the one receiving instructions knows what to do and has the right tools for it. Declarative approaches have an underlying imperative abstraction.
+
+###### References
+
++ [tylermcginnis.com/imperative-vs-declarative-programming/](https://tylermcginnis.com/imperative-vs-declarative-programming/)
+
+## Parallel Computing
+
+Type of computation in which many calculations are carried out simultaneously whose results are combined upon completion. Large problems can often be divided into smaller ones, which can then be solved at the same time. As power consumption (and consequently heat generation) by computers has become a concern in recent years, parallel computing has become the dominant paradigm in computer architecture, mainly in the form of multi-core processors.
+
+Closely related to concurrent computing. They are frequently used together, and often conflated, though the two are distinct (it's possible to have one without the other e.g.  bit-level parallelism or multitasking by time-sharing on a single-core CPU). The major contrast with concurrent computing is that, in the latter, the various processes often do not address related tasks. When they do, as is typical in distributed computing, the separate tasks may have a varied nature and often require some inter-process communication during execution.
+
+## Modular Programming
+
+Emphasizes separating the functionality of a program into independent, interchangeable modules, such that each contains everything necessary to execute only one aspect of the desired functionality. A module interface expresses the elements that are required (input) and provided (output) by the module. The elements defined in the interface are detectable by other modules. 
+
+Closely related to structured programming and OOP (same goal of facilitating construction of large software programs and systems by decomposition into smaller pieces).
+
+### Concurrent Computing
+
+A form of computing in which several computations are executed concurrently i.e. during overlapping time periods; instead of sequentially i.e. with one completing before the next starts. A concurrent system is one where a computation can advance without waiting for all other computations to complete.
 
 # Design Patterns
 
