@@ -185,7 +185,7 @@ Not as strict as AVL tree.
 
 + Imperative programming (C, C++, Java, Fortran)
   + Procedural programming
-  + Object-oriented programming
+  + Object-oriented programmSSWing
   + Parallel computing
     + Bit-level parallelism
 + Declarative programming (HTML, React, Regex)
@@ -278,4 +278,34 @@ Closely related to structured programming and OOP (same goal of facilitating con
 A form of computing in which several computations are executed concurrently i.e. during overlapping time periods; instead of sequentially i.e. with one completing before the next starts. A concurrent system is one where a computation can advance without waiting for all other computations to complete.
 
 # Design Patterns
+
+
+
+# Prime numbers search
+
+Prime Sieves are algorithms that find all prime numbers lower than a given number N.
+
+## Sieve of Eratosthenes
+
+1. i = 2
+2. Add i to the list of prime numbers
+3. Cross out all multiples of i < N
+4. i++
+5. Take the first number that isn't crossed out
+6. Go back to 3
+
+## Sieve of Sundaram
+
+1. i = 1
+2. x = i; y = i
+3. Cross out `res = x + y + 2xy`
+   + if `res > N`
+     + `if x == y` go to 4
+     + else `i++` ; repeat 2
+   + `else x++`; repeat 3
+4. For every number, n, that isn't crossed out: `new prime nr = 2n + 1`
+
+## Sieve of Atkin
+
+
 
