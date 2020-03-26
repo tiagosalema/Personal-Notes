@@ -89,6 +89,54 @@ If the data is already sorted:
 
 [This](https://www.youtube.com/watch?v=eSOJ3ARN5FM&list=PLTd6ceoshprdS7HVI-Yus4rAHtrqNzH0j&index=22) video explains how to apply this algorithm.
 
+## String matching algorithms
+
+### Basic/Naive algorithm
+
+Will compare both pattern and string characters until they both match completely. Every time there's a mismatch, a new set of comparisons is started between the very first character of the pattern and the character after the first one on the previous string comparison.
+
+### KMP (Knuth-Morris-Pratt)
+
+Builds a table called π or lps (longest prefix [that matches a] sufix). For example:
+
+| **a** |  b   |  c   |  d   | <u>a</u> | <u>b</u> |  e   | <u>a</u> | <u>b</u> | f    |
+| :---: | :--: | :--: | :--: | :------: | :------: | :--: | :------: | :------: | ---- |
+|   0   |  0   |  0   |  0   |    1     |    2     |  0   |    1     |    2     | 0    |
+
+|  a   |  b   |  c   |  d   |  e   |  a   |  b   |  f   |  a   |  b   |  c   |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+|  0   |  0   |  0   |  0   |  0   |  1   |  2   |  0   |  1   |  2   |  3   |
+
+|  a   |  a   |  a   |  a   |  b   |  a   |  a   |  c   |  d   |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+|  0   |  1   |  2   |  3   |  0   |  1   |  2   |  0   |  0   |
+
+
+
+[How to apply this algorithm](https://youtu.be/V5-7GzOfADQ?t=750)
+
+### Rabin-Karp algorithm
+
+This algorithm numerically sums all the characters in the pattern and compares that sum with the one of sections of the reference string. This is benefitial because it is not necessary to compare each character, one by one. 
+
+To avoid unfortunate mismatches (technically called spurious hits) i.e. `if a=1, b=2, c=3 => ac ≡ bb ≡ 4` one can make a weighted sum `ac ≡ 10¹⋅1 + 10⁰⋅3 = 13 ≢ bb ≡ 10¹⋅2 + 10⁰⋅2 = 22`.
+
+The base of the formula was `10` in this example for simplicity. It should be as big as the number of characters that there are in both the pattern and reference string.
+
++ If all the characters (lowercase) ⇒ `26`,
++ lowercase + uppercase ⇒ `52`,
++ all algarisms ⇒ `10`
++ All of the above ⇒ `62`
++ With symbols ⇒ `Phew`
+
+This method can get get quite expensive, as seen in the last 2 examples of the above list. It can be the case that the resulting sum will be bigger than what the computer can deal with. In such cases, you might want to apply `mod` upon the obtained sum `sum % x`, where `x` is the maximum size of your data type. Be wary that mod might increase the amount of sporious hits.
+
+As a final note, it is not necessary to sum on each iteration over the reference string. It is only necessary to:
+
+1. subtract the weighted value of the first characther
+2. multiply the result of the subtration by the weight factor (so that each element gets an increased weight)
+3. add the next element
+
 # Data Structures
 
 ## Array list
