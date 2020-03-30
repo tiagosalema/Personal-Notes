@@ -69,6 +69,66 @@ If the data is already sorted:
    + Discard all the elements to its right otherwise.
 2. Repeat until the list is just one element.
 
+### Breadth-First Search
+
+Search for the closest path between 2 nodes by looping through all neighbors of one node first, inserting them on a queue, so that their neighbors are search after.
+
+**Pseudocode**
+
+```
+procedure BFS(G, start_v) is  
+  let Q be a queue
+  label start_v as discovered
+  Q.enqueue(start_v)
+  while Q is not empty do
+    v := Q.dequeue()
+    if v is the goal then
+      return v
+    for all edges from v to w in G.adjacentEdges(v) do
+      if w is not labeled as discovered then
+        label w as discovered
+        w.parent := v
+        Q.enqueue(w)
+```
+
++ **Input**: A graph *Graph* and a *starting vertex* *root* of *Graph*
++ **Output**: Goal state. The *parent* links trace the shortest path back to *root*
+
+### Depth-First Search
+
+Opposite strategy as breadth-first search. It explores the node branch as far as possible before being forced to backtrack and expand other nodes.
+
+**Pseudocode**
+
+<u>Recursive</u>
+
+```
+procedure DFS(G, v) is
+  label v as discovered
+  for all directed edges from v to w that are in G.adjacentEdges(v) do
+    if vertex w is not labeled as discovered then
+      recursively call DFS(G, w)
+```
+
+<u>Non-recursive</u>
+
+```
+procedure DFS-iterative(G, v) is
+  let S be a stack
+  S.push(v)
+  while S is not empty do
+    v = S.pop()
+    if v is not labeled as discovered then
+      label v as discovered
+      for all edges from v to w in G.adjacentEdges(v) do 
+        S.push(w)
+```
+
++ **Input**: A graph G and a vertex v of G
++ **Output**: All vertices reachable from v labeled as discovered
+
+
+
 ## Shortest path
 
 ### Dijkstra’s Algorithm
@@ -79,8 +139,8 @@ If the data is already sorted:
 
 ### A* Pathfinding Algorithm
 
-+ It's an enhancement of Dijkstra’s algorithm, but potentially more efficient.
-+ Better choice when we want to find the closest path between **2 particular vertices**.
++ Best to find best path between **2 particular vertices**.
++ Enhancement of Dijkstra’s algorithm, albeit potentially more efficient.
 + Ideally won't visit all vertices
 + Picks the most promising node based on heuristics i.e. a previous estimation of how far that node is to the destination node
 + The better the heuristics for all nodes, the faster the path is going to be found
