@@ -19,7 +19,7 @@ console.log(arguments);
 into
 
 ```js
-function(exports, module,require,__filename,__dirname) {
+function(exports, require, module, __filename, __dirname) {
   console.log(arguments);
   return  module.exports; // returned by default (no need to do it by hand)
 }
@@ -128,7 +128,23 @@ const myTemplate = templateGenerator('Hello Node!');
 console.log(myTemplate);
 ```
 
+## Module arguments
 
++ exports
+
+  links to the property `exports` of `module` i.e. it's equivalent to `const { exports } = module;`
+
++ require
+
+  Function that receives a string as input (filename, with extension `js`, `json` or `node` - checked in this order) and returns its `exports`
+
++ module
+
+  contains all the info of the module, including the filename, paths where it will search for the required files, etc.
+
++ __filename
+
++ __dirname
 
 ## Event Emitters
 
@@ -170,6 +186,69 @@ myEmitter.on('TEST_EVENT', (x,y) => {
 myEmitter.emit('TEST_EVENT', 10, "hello");
 // TEST_EVENT was fired with values 10 and hello
 ```
+
+
+
+With a class:
+
+```js
+  
+const EventEmitter = require('events');
+
+class WithLog extends EventEmitter {
+  execute(taskFunc) {
+    console.log('Before executing');
+    this.emit('begin');
+    taskFunc();
+    this.emit('end');
+    console.log('After executing');
+  }
+}
+
+const withLog = new WithLog();
+
+withLog.on('begin', () => console.log('About to execute'));
+withLog.on('end', () => console.log('Done with execute'));
+
+withLog.execute(() => console.log('*** Executing task ***'));
+```
+
+```js
+const fs = require('fs');
+const EventEmitter = require('events');
+
+class WithTime extends EventEmitter {
+  execute(asyncFunc, ...args) {
+    console.time('execute');
+    asyncFunc(...args, (err, data) => {
+      if (err) {
+        return this.emit('error', err);
+      }
+
+      this.emit('data', data);
+      console.timeEnd('execute');
+    });
+  }
+}
+
+const withTime = new WithTime();
+
+withTime.on('data', (data) => {
+  console.log(`Length: ${data.length}`);
+});
+
+// this event will only execute once
+process.once('uncaughtException', (err) => {
+  console.log(err);
+  // do some cleanup...
+  process.exit(1); // exit anyway
+});
+
+withTime.execute(fs.readFile, '');
+withTime.execute(fs.readFile, __filename);
+```
+
+
 
 # Async operations
 
@@ -249,6 +328,10 @@ console.log('TEST');
 
 + `npm ls -g --depth=0`
   Checks all the packages saved in global
+  
++ `npm prune`
+
+  Deletes all packages that aren't documented in `package.json` (and their dependencies)
 
 # Web Servers
 
@@ -348,3 +431,159 @@ Instead of writing plain old boring static html, we can use templating languages
 1. `node --inspect-brk filename.js` (`brk` stands for break)
 2. go to the url `chrome://inspect`
 3. The execution of `filename.js` will be listed there. Click `inspect`.
+
+
+
+# Other things
+
+## File execution (terminal vs. internally)
+
+The challenge is to execute the following file
+
+```js
+// printStars.js
+const print = (stars, header) => {
+	console.log('*'.repeat(stars));
+  console.log(header);
+  console.log('*'.repeat(stars));
+}
+```
+
+directly from the terminal and indirectly through another script, i.e. executing it through index.js (using `require`)
+
+```js
+// index.js
+const printStars = require('./printStars');
+printStars(10, 'Hi!')
+```
+
+This if statement will solve it:
+
+```js
+// ...printStars.js
+if (require.main == module) {
+  // Running as a script
+  print(process.argv[2], process.argv[3]);
+} else {
+  // Being required
+  module.exports = print;
+}
+```
+
+Now, we can call both script using
+
+```bash
+node printStars.js 5 hello			# Direct execution of printStar.js, passing in the arguments
+node index.js										# Indirect execution of printStar.js through index.js
+```
+
+# Event Loop
+
+In Node, I/O operations are usually referring to accessing disk and networking resources, which is the most time expensive part of all operations. Node's Event Loop is designed around the fact that the largest waste in computer programming comes from waiting in such io operation to complete. We can handle requests in such operations in several ways:
+
++ Synchronously - slow
++ fork() - nor scalable
++ threads - one for each request - complicated
++ event loop - doesn't block the main execution. 
+
+The Event Loop is the entity that handles external events and converts them into callback invocations. In other words, it's a loop that picks events from the event queue and pushes their callbacks to the call stack.
+
+This loop is basically an infinite loop that starts with the command `npm start` and finsishes with the command `process.exit()`.
+
+The runtime engine (e.g. V8) is comprised of the stack and the heap (where objects are stored). Node adds API like timers, emitters and provides the queue and loop using the `libuv` library.
+
+**How to take advantage of the Event Loop?**
+
+## Callbacks
+
+Initially, it was using callbacks. Callback is a function that runs after another finishes. In the following example the `readFile` method of the `fs` module is asynchronous. The function where this asynchronous event is being executed also happens to receive a function `cb`, which will only execute once `readFile` is done. This function is, thus, a callback. What this method does is to inject 2 arguments that are returned from `fs.readFile(file)` into the second method's argument (the callback function).
+
+```js
+const fs = require('fs');
+
+const readFileAsArray = (file,cb) => {
+  fs.readFile(file, (err, data) => {
+    if(err) {
+      return cb(err); // forwards err to cb
+    }
+    
+    const lines = data.toString().trim().split('\n');
+    cb(null, lines); // forwards lines to cb
+  })
+}
+
+// example call
+readFileAsArray('./numbers', (err, lines) => { // file numbers has only lines with numbers
+  if (err) throw err;
+  
+  const numbers = lines.map(Number);
+  const oddNumbers = numbers.filter(number => number % 2 === 1);
+  console.log('odd numbers count:', addNumbers.length);
+});
+```
+
+
+
+## Promises
+
+The previous snippet can be converted into a promise, which is arguably more readable. It will, instead of passing a callback as an argument and handling the error in the same place, a promise object allows us to handle success and error cases seperately, as well as chain multiple calls instead of nesting them.
+
+```js
+const fs = require('fs');
+
+const readFileAsArray = file => {								// no longer receives the callback cb
+  return new Promise((resolve, reject) => {			// new Promise instead
+    fs.readFile(file, (err, data) => {
+      if(err) {
+        return reject(err); 										// replaced cb by reject
+      }
+
+      const lines = data.toString().trim().split('\n');
+      resolve(lines); 													// replaced cb by resolve
+    })
+  })
+}
+
+readFileAsArray('./numbers')
+	.then(lines => {
+    const numbers = lines.map(Number);
+    const oddCount = numbers.filter(nr => nr % 2 == 1).length;
+    console.log('odd numbers count:', oddCount);
+	})
+	.catch(err => throw err)
+```
+
+
+
+## Async/await
+
+Has to be executed with the flag `--harmony-async-await`: `node --harmony-async-await index.js`
+
+```js
+async const countOdd = () => {
+  try {
+    // with await, we treat the async as if it was sync:
+    const lines = await readFileAsArray('./numbers'); 																			
+    const numbers = lines.map(Number);
+    const oddCount = numbers.filter(nr => nr % 2 == 1).length)
+  } catch(err) {
+		throw err;
+  }
+}
+countOdd();
+```
+
+
+
+
+
+
+
+
+
+**Sources**:
+
+[Advanced Node.js, by Samer Buna](https://app.pluralsight.com/courses/0d10b83d-4a1c-487e-9da1-e4cbf1bce8ab/table-of-contents)
+
+[jscomplete/advanced-nodejs](https://github.com/jscomplete/advanced-nodejs)
+
