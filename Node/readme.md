@@ -250,6 +250,70 @@ withTime.execute(fs.readFile, __filename);
 
 
 
+## Popular modules
+
+### Built-in
+
++ [os](https://nodejs.org/api/os.html)
+
++ [fs](https://nodejs.org/api/fs.html)
+
++ http
+
+  Comprised of 5 main classes:
+
+  + `Server` - used to create a basic server. Inherits from the `net` module's class `Server` (i.e. `net.Server`), thus, it's an Event Emitter as well.
+
+    ```js
+    const server = require('http').createServer();
+    // server is of type http.Server   
+    ```
+
+  + `ServerResponse` 
+
+    ```js
+    server.on('request', (req, res) => {
+      // req: from the http.IncomingMessage class
+      // res: from the http.ServerResponse class
+    })
+    ```
+
+  + `IncomingMessage`
+
+  + `ClientRequest`
+
+    ```js
+    const req = http.request(
+      { hostname: 'www.google.com' },
+      res => ...
+      // req: from the http.IncomingMessage class 
+    )
+    // req: from the http.ClientRequest class 
+    ```
+
+  + `Agent` - manages e.g. pulling sockets used in client requests
+
+    ```js
+    const agent = req.agent;
+    // agent: from the http.Agent class
+    ```
+
+    
+
+### External
+
++ Nodemon
+
+  Refreshes the server every time the code is saved. The only thing to know about it is that we execute our files by writing `nodemon filename.js` instead of `file.js`
+
++ Express
+
+  Starts a web server and does all the customatization that we'd have to manually do using the built-in http node module. Express is the more widely used one to create web servers, but here are a few that are also used:
+
+  + Meteor
+  + Koa
+  + Sails
+
 # Async operations
 
 It's better to use promises than callbacks, since it improves readability.
@@ -402,27 +466,7 @@ Instead of writing plain old boring static html, we can use templating languages
 
 - React/JSX
 
-# Popular modules
-
-## Built-in
-
-+ [os](https://nodejs.org/api/os.html)
-+ [fs](https://nodejs.org/api/fs.html)
-+ 
-
-## External
-
-+ Nodemon
-
-  Refreshes the server every time the code is saved. The only thing to know about it is that we execute our files by writing `nodemon filename.js` instead of `file.js`
-
-+ Express
-
-  Starts a web server and does all the customatization that we'd have to manually do using the built-in http node module. Express is the more widely used one to create web servers, but here are a few that are also used:
-
-  + Meteor
-  + Koa
-  + Sails
++ + 
 
 
 
@@ -575,15 +619,467 @@ countOdd();
 
 
 
+# Streams
+
+Working with big amounts of data in Node.js means working with streams.
+
+A stream is a collection of data that might not be available all at once and doesn't have to fit in memory.
+
+All streams are EventEmitters.
+
+Notice that `process`, `process.stdin`, `process.stdout` are streams and, hence, are also EventEmitters and can listen to events like
+
+```js
+process.on('exit', cb)
+```
+
+```js
+process.stdout.on('error', process.exit)
+```
 
 
 
+Let's write a big file using a writable stream:
+
+```js
+const fs = require('fs');
+const file = fs.createWriteStream('./big.file');
+
+for(let i=0; i<= 1e6; i++) {
+  file.write('This is a chunk line being writen in ./big.file')
+	// each time write is called on file, a new `chunk` is written into it
+}
+// after 1 million lines are written...
+
+file.end(); 
+```
+
+Let's now create a server to serve this big file:
+
+```js
+const fs = require('fs');
+const server = require('http').createServer();
+
+server.on('request', (req, res) => {
+  // Here, we can use res in 2 different ways (see bellow)
+})
+
+server.listen(8000);
+```
+
+```js
+// 1. writing in res all at once with a simple http server with the readfile method
+fs.readFile('./big.file', (err, data) => {
+  if (err) throw err;
+
+  res.end(data)
+})
+```
+
+```js
+// 2. writing in res as a stream with the createReadStream method
+const src = fs.createReadStream('./big.file');
+src.pipe(res);
+```
+
+1. Executing this node script will make the computer memory go through the roof, as its execution buffers the whole file in memory before serving it and writing it out. This script is very inefficient.
+
+2. Note that:
+
+   + `res` is a writable stream 
+   + with Node, it is possible to pipe streams (from readable to writable)
+
+   For these reasons, we chose to create a stream out of the big file and pipe it into the `res` object stream. Running this script will have a much lower impact on the computer's memory.
+
+For certain file sizes, it is not even possible to use method 1, as computers have a buffer limit. If the file was e.g. 2 Gb, the code would throw an error if a stream is not used, as this limit was surpassed. 
+
+## Piping
+
+Notice how the `pipe()` method was applied in the following way:
+
+```js
+source.pipe(destination);
+```
+
+Where `source` is a readable stream and `destination` is a writable stream.
+
+It is possible to chain this method:
+
+```js
+a.pipe(b).pipe(c).pipe(d);
+```
+
+Where `b` and `c` have to be duplexes, since that is the same as
+
+```js
+a.pipe(b);
+b.pipe(c);
+c.pipe(d);
+```
+
+This is analogous to the Unix notation of `a | b | c | d`.
+
+It is also possible to combine events if we need to. For example, it would be possible to log to the console a message when the piping line is finished:
+
+```js
+a.pipe(b).pipe(c).on('finish', () => console.log('Finished!'));
+```
+
+Events can be inserted anywhere in the piping chain:
+
+```js
+a.pipe(b)
+ .on('data', () => console.log('Another chunk!'))
+ .pipe(c)
+```
+
+The above code could have also been done with a customized stream defined before the pipeline:
+
+```js
+const progress = new Transform({
+  transform(chunk, encoding, cb) {
+    process.stdout.write('Another chunk.');
+    cb(null, chunk); // equivalent to this.push(chunk)
+  }
+})
+
+a.pipe(b)
+ .pipe(progress)
+ .pipe(c)
+```
 
 
+
+## Common Events
+
+| Readable                                                     | Writable                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| data<br />Emitted whenever the stream passes a chunk of data to the consumer | drain<br />Signal that the writable stream can receive more data |
+| end<br />Emitted when there is no more data to be consumed from the stream | finish<br />Emitted when all the data has been flushed to the underlying system |
+| error                                                        | error                                                        |
+| close                                                        | close                                                        |
+| readable                                                     | pipe/unpipe                                                  |
+
+## Common Methods
+
+| Readable              | Writable           |
+| --------------------- | ------------------ |
+| pipe, unpipe          | write              |
+| read, unshift, resume | end                |
+| pause, isPaused       | cork, uncork       |
+| setEncoding           | setDefaultEncoding |
+
+
+
+## Types of streams
+
+
+
+### Readable
+
+e.g. `fs.createReadStream`
+
+Have 2 main modes that affect the way we consume them (**paused** and **flowing**).
+
++ `.read()`  is used to consume paused readable streams
++ EventListeners are used to consume flowing streams, since data is continuously flowing (that's why data can actually be lost if there are no consumers to handle it.
+
+```js
+const { Readable } = require('stream');
+
+const inStream = new Readable();
+
+inStream.push('1 2 3 4 5 6 7 8 9 10');
+inStream.push(null); // signals that the stream has no more data
+
+inStream.pipe(process.stdout);
+```
+
+This is not very efficient, since we are pushing all the data to the stream before piping it to `process.stdout`. Best would be to push it gradually:
+
+```js
+const inStream = new Readable({
+  read() {
+    this.push(this.number++ + ' ');
+    if(this.number > 10) this.push(null)
+  }
+})
+
+inStream.number = 1;
+```
+
+## 
+
+### Writable 
+
+e.g. `fs.createWriteStream`
+
+```js
+const { Writable } = require('stream');
+
+const outStream = new Writable({
+  write(chunk, encoding, cb) {
+    console.log(chunk.toString());
+    cb();
+  }
+});
+
+process.stdin.pipe(outStream);
+```
+
+This example outputs everything sent via `process.stdin`. It's pretty much the same as doing
+
+```js
+process.stdin.pipe(process.stdout);
+```
+
+
+
+### Duplex
+
+e.g. `net.Socket`
+
+Both readable and writable e.g. socket.
+
+```js
+const { Duplex } = require('stream')
+
+const duplexStream = new Duplex({
+  write(chunk, encoding, cb) {
+    console.log(chunk.toString());
+    cb();
+  },
+  read() {
+    if (this.number > 10) {
+      this.push(null);
+      return;
+    }
+    this.push(this.number++ + "\n")
+  }
+})
+
+duplexStream.number = 1;
+
+process.stdin.pipe(duplexStream).pipe(process.stdout);
+```
+
+This example creates the stream (`write`) and immediately reads from it (`read`). This is a useless stream. It is just meant to prove that both these methods are possible to be used within the same constructor.
+
+
+
+### Transform
+
+e.g. `zlib.createGzip`
+
+Has the capacity to modify chunks as it reads them. It differs from Duplex as a Duplex has to read
+
+```js
+const { Transform } = require('stream');
+
+const upperCase = new Transform({
+  transform(chunk, encoding, cb) {
+    this.push(chunk.toString().toUpperCase());
+    cb();
+  }
+})
+
+process.stdin.pipe(upperCase).pipe(process.stdout);
+```
+
+A more useful example would be:
+
+```js
+const fs = require('fs');
+const zlib = require('zlib');
+const file = process.argv[2];
+
+fs.createReadStrem(file)
+  .pipe(zlib.createGzip())
+  .pipe(fs.createWriteStream(file + '.gz'));
+```
+
+Which compresses a given file. It's possible to get the uncompressed version of the file by doing in the terminal `gunzip file_name.gz`
+
+# Clusters and Child Processes
+
+It's possible to run multiple threads at the same time.
+
+There are 3 main ways to scale an application:
+
++ Clone it multiple times and have each instance handle a different part of the workload.
++ Decomposing (i.e. microservices) based on functionality.
++ Splitting into multiple instances that handle different data (data partitioning) - based on country, language, etc.
+
+## Cloning
+
+Cloning is done by creating a child process. There are 4 different ways to create a child process:
+
++ spawn
++ fork
++ exec
++ execFile
+
+All of these have synchronous blocking versions.
+
+### spawn( )
+
+Launches the command in a new process.
+
+```js
+const { spawn } = require('child_process');
+
+const child = spawn('pwd', []); // extra arguments are included in the array
+
+child.stdout.on('data', data => console.log(data.toString())); // if success
+child.stderr.on('data', data => console.log(data.toString())); // if error
+child.stdout.on('exit', (code, signal) => console.log(code, signal));
+```
+
+Other `child` events:
+
++ disconnect - triggered when the parent manually emits it 
++ error - when the process couldn't be spawned
++ message - triggered when the child uses `process.send`. It's how parent/child communicate.
++ close - emitted when the standard I/O stream of a child process get closed
+
+
+
+The following example counts how many  lines, words and characters are in `process.stdin`:
+
+```js
+const { spawn } = require('child_process');
+
+const child = spawn('wc');
+
+process.stdin.pipe(child.stdin);
+
+child.stdout.on('data', data => console.log(data.toString()));
+```
+
+Note: to terminate the code, type Ctrl + C.
+
+Yet another note: The child's `stdin` is actually a writable stream, contrary to the `process`'s.
+
+Multiple processes can be piped:
+
+```js
+const { spawn } = require('child_process');
+
+const find_files = spawn('find', ['.', '-type', 'f']);
+const line_count = spawn('wc', ['-l']);
+
+find_files.stdout.pipe(line_count.stdin);
+
+line_count.stdout.on('data', () => console.log(`There are ${data} files in this directory.`))
+```
+
+It's possible to make the child inherit stdio from its parent:
+
+```js
+const { spawn } = require('child_process');
+
+const child = spawn('find', ['.', '-type', 'f'], {
+  stdio: 'inherit'
+})
+```
+
+Using the shell syntax, instead of an array to pass the extra arguments:
+
+```js
+const { spawn } = require('child_process');
+
+const child = spawn('find . -type f', {
+  stdio: 'inherit',
+  shell: true
+})
+```
+
+Notice spawn doesn't buffer the data, as exec does.
+
+Other options that can be specified:
+
+```js
+cwd: '/Users'
+```
+
+Changes the current working directory where the process will be executed.
+
+```js
+const child = spawn('echo $ANSWER', {
+  env: { ANSWER: 43 }
+})
+```
+
+Specifies environment variables that will be visible to the new process. Defaults to `process.env`.
+
+It's possible to keep a child running independently of its parent. For that, it's necessary to set 2 options:
+
+```js
+const child = spawn('node', [ 'timer.js' ], {
+  detached: true,
+  stdio: 'ignore'
+})
+
+child.unref();
+```
+
+```js
+// timer.js
+setTimeout(() => {
+  // keeps running during 20 seconds, even if parent is promptly unref'ed
+}, 20_000);
+```
+
+The execution of the parent will trigger its child to execute and it will promply terminate. However, the child will continue its execution.
+
+### exec( )
+
+Similar to `spawn`, with 2 major differences:
+
++ creates a shell (which makes it less efficient). It's kind of a terminal execution context, where we can pass as an input the native terminal commands (without the need to use an array with extra commands)
++ buffers the command's generated output to a callback function. Adequate if the data returned by the command isn't big, since all the buffer will be returned.
+
+```js
+const { exec } = require('child_process');
+
+exec('find . -type | wc -l', (err, stdout, stderr) => console.log(stdout));
+```
+
+### execFile( )
+
+Same as `exec` without creating a shell.
+
+### fork ( )
+
+
+
+# Networking and Protocols
+
+## Protocol
+
+It's the language that computers use to speak with each other
+
++ HTTP - Browse web pages
++ HTTPS - Browse web pages with encryption
++ SMTP - send and receive emails
++ IMAP, POP3 - load emails from inbox
++ IRC - chat
++ FTP - file transfer
++ SSH - remote shell over an encrypted connection
++ SSL - low-level secure data transfer (used by HTTPS)
+
+### Protocol Stack
+
+|                 |                                        | Layer             |
+| --------------- | -------------------------------------- | ----------------- |
+| App             | Network service e.g. DNS or HTTP       | Application layer |
+| Transport Layer | exampes: TCP or UDP                    | 4                 |
+| Network Layer   | IP address                             | 3                 |
+| Data Link Layer | Ethernet/MAC/Physical/Hardware address | 2                 |
+| Physical Layer  | Bits sent over the network             | 1                 |
 
 **Sources**:
 
 [Advanced Node.js, by Samer Buna](https://app.pluralsight.com/courses/0d10b83d-4a1c-487e-9da1-e4cbf1bce8ab/table-of-contents)
 
 [jscomplete/advanced-nodejs](https://github.com/jscomplete/advanced-nodejs)
-

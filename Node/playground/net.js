@@ -1,8 +1,5 @@
-const server = require('http').createServer();
+const { spawn } = require('child_process');
 
-server.on('request', (req, res) => {
-  res.writeHead(200, { 'content-type': 'text/plain' })
-  res.end('Hello world!\n')
-})
-
-server.listen(8000)
+const child = spawn('ls', {
+  stdio: 'inherit'
+});
