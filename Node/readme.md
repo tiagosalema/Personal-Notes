@@ -1,5 +1,7 @@
 
 
+
+
 # Modules
 
 A module is a file that contains code. However, it's more accurate to refer to it as module rather than file, as Node doesn't execute it as is. Instead, it wraps the file in a function. This function receives 5 arguments by default:
@@ -278,8 +280,24 @@ withTime.execute(fs.readFile, __filename);
     })
     ```
 
-  + `IncomingMessage`
+    It can also be done directly inside the `createServer()` argumen:
 
+    ```js
+  const { createServer } = require('http');
+    
+    createServer((req, res) => {
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      req.on( 'data' , chunk => res.write(chunk.toString().toUpperCase()) );
+      req.on( 'end' , () => res.end() )
+    }).listen(8000);
+    ```
+  
+  
+  
+  
+  
+  + `IncomingMessage`
+  
   + `ClientRequest`
 
     ```js
@@ -290,14 +308,14 @@ withTime.execute(fs.readFile, __filename);
     )
     // req: from the http.ClientRequest class 
     ```
-
+  
   + `Agent` - manages e.g. pulling sockets used in client requests
-
+  
     ```js
     const agent = req.agent;
     // agent: from the http.Agent class
     ```
-
+  
     
 
 ### External
@@ -475,51 +493,6 @@ Instead of writing plain old boring static html, we can use templating languages
 1. `node --inspect-brk filename.js` (`brk` stands for break)
 2. go to the url `chrome://inspect`
 3. The execution of `filename.js` will be listed there. Click `inspect`.
-
-
-
-# Other things
-
-## File execution (terminal vs. internally)
-
-The challenge is to execute the following file
-
-```js
-// printStars.js
-const print = (stars, header) => {
-	console.log('*'.repeat(stars));
-  console.log(header);
-  console.log('*'.repeat(stars));
-}
-```
-
-directly from the terminal and indirectly through another script, i.e. executing it through index.js (using `require`)
-
-```js
-// index.js
-const printStars = require('./printStars');
-printStars(10, 'Hi!')
-```
-
-This if statement will solve it:
-
-```js
-// ...printStars.js
-if (require.main == module) {
-  // Running as a script
-  print(process.argv[2], process.argv[3]);
-} else {
-  // Being required
-  module.exports = print;
-}
-```
-
-Now, we can call both script using
-
-```bash
-node printStars.js 5 hello			# Direct execution of printStar.js, passing in the arguments
-node index.js										# Indirect execution of printStar.js through index.js
-```
 
 # Event Loop
 
@@ -1051,7 +1024,118 @@ Same as `exec` without creating a shell.
 
 ### fork ( )
 
+Spawn variation.
 
+```js
+const { fork } = require('child_process');
+
+const forked = fork('child.js');
+
+forked.on('message', msg => console.log(msg));
+forked.send('From parent to child' });
+```
+
+```js
+// child.js
+process.on('message', msg => console.log(msg));
+process.send('From child to parent');
+```
+
+A more practical example is assigning a heavy computational task to a forked element so that future requests don't have to await for that long process to finish:
+
+```js
+const http = require('http');
+const { fork } = require('child_process');
+
+const server = http.createServer();
+
+server.on('request', (req, res) => {
+  res.write(`\n${req.url}\n`)
+  if (req.url == '/heavy-task') {
+    const another_process = fork('child.js');
+    another_process.send('go!');
+    another_process.on('message', sum => res.end(`Sum is ${sum}`));
+  } else {
+    res.end('That was easy.')
+  }
+})
+
+server.listen('80');
+```
+
+```js
+// heavy_task.js
+process.on('message', () => process.send(2n ** 1500000n + '')); // n stands for bigint
+```
+
+## The Cluster Module
+
+```js
+// server.js
+const http = require('http');
+const pid = process.pid; // pid = process id - just to verify that it's running diff processes
+
+http.createServer((req, res) => res.end(`Handled by process ${pid}`))
+		.listen(80, () => console.log(`Started process ${pid}`));
+```
+
+Create a cluster to clone this server into multiple workers:
+
+```js
+// cluster.js
+const cluster = require('cluster')
+const os = require('os')
+
+if (cluster.isMaster) {
+  const cpus = os.cpus().length;
+  console.log(`Forking for ${cpus} CPUs`)
+  
+  for (let i = 0; i < cpus; i++) cluster.fork();
+} else require('./server');
+```
+
+When running `cluster.js`, the cluster module will be useful as it will be able to identify whether the current file is being loaded as the master file or not. The first time of execution is done by the master process => `isMaster == true`. In this case, we fork as many workers as there are CPUs in the computer running the script. When the fork is created, the very same file is run again, with one single difference: `isMaster == false`. That's when a new server is defined by executing `server.js`. Note that each server is completely independent from all the others (has an independent event loop, etc.).
+
+The master process has access to each worker by the object `cluster.workers`. Has their relation is the previously seen `fork`ed relation, it's possible to send/receive messages to each worker. If we'd want to send a message to each one:
+
+```js
+Object.values(cluster.workers).forEach(worker => worker.send(`Hello worker ${worker.id}!`));
+```
+
+This message can be received by the worker by listening to the main `process` event `message`:
+
+```js
+process.on('message', msg => console.log(msg));
+```
+
+
+
+One of the big advantages of running multiple workers is the fact that the more services there are, the less likely it is that a request is going to fail in case a server is down. If we only have one server running and the server crashes for some reason, it will have to reinitialise. Even if this reinitialization is automated (which it should be), there's always gonna be some down time. The reinitialization of a random crashed server when multiple are running :
+
+```js
+// server.js
+
+// ...
+
+setTimeout(() => process.exit(1), Math.random() * 10_000); // process exist on a random time
+```
+
+```js
+// cluster.js
+
+if (cluster.isMaster) {
+  // ...
+  
+  cluster.on('exit', (worker, code, signal) => {
+    if (code != 0 && !worker.exitedAfterDisconnect) { // *
+      console.log(`Worker ${worker.id} crashed. Starting a new one...`);
+      cluster.fork();
+    }
+  })
+}
+```
+
+\* Assures that the worker indeed crashed and wasn't manually killed by the master. The master may have code to evaluate certain factors (e.g. memory use) and  kill some workers if certain thresholds are reached. It's possible to do so by invoking `cluster.kill` or `cluster.disconnect`. These methods will set the argument `worker` variable `exitedAfterDisconnect` to true.
 
 # Networking and Protocols
 
@@ -1061,10 +1145,15 @@ It's the language that computers use to speak with each other
 
 + HTTP - Browse web pages
 + HTTPS - Browse web pages with encryption
-+ SMTP - send and receive emails
++ IP - Internet Protocol - **Networking** protocol - responsible for getting data from one machine to another over the internet
++ TCP - Transmission Control Protocol - **Transport** protocol - responsible for ensuring data arrives intact or requesting retransmission if not (TCP/IP - "TCP via IP", TCP being the transport protocol that uses IP as the networking protocol)
++ UDP - **Transport** protocol - User Diagram Protocol - used for info that requires no response (mainly for streaming)
++ SMTP - Simple Mail Transport Protocol - send and receive emails
 + IMAP, POP3 - load emails from inbox
 + IRC - chat
-+ FTP - file transfer
++ FTP - File Transfer Protocol
++ SNMP - Simple Network Management Protocol - used to collect system information from a remote computer
++ Telnet - used to perform commands on a remote computer
 + SSH - remote shell over an encrypted connection
 + SSL - low-level secure data transfer (used by HTTPS)
 
@@ -1077,6 +1166,69 @@ It's the language that computers use to speak with each other
 | Network Layer   | IP address                             | 3                 |
 | Data Link Layer | Ethernet/MAC/Physical/Hardware address | 2                 |
 | Physical Layer  | Bits sent over the network             | 1                 |
+
+
+
+## Different kinds of connection
+
+![comparison of modem with router and gateway combo](https://www.tech21century.com/wp-content/uploads/2019/02/modem-router-gateway.png)
+
+[Source](https://www.tech21century.com/modem-vs-router-vs-gateway/)
+
+### Modem
+
+The **mo**dulator - **dem**odulator is the border device that translate the signals exchanged between the ISP and the LAN devices. Depending on the ISP being paid for, there are 3  ISP - modem connectors:
+
+- Coaxial Cable
+- DSL (Asymmetric Digital Subscriber Line) - uses the same wires as a regular telephone line.
+- Fiber Optic Cable
+
+# Other things
+
+## File execution (terminal vs. internally)
+
+The challenge is to execute the following file
+
+```js
+// printStars.js
+const print = (stars, header) => {
+	console.log('*'.repeat(stars));
+  console.log(header);
+  console.log('*'.repeat(stars));
+}
+```
+
+directly from the terminal and indirectly through another script, i.e. executing it through index.js (using `require`)
+
+```js
+// index.js
+const printStars = require('./printStars');
+printStars(10, 'Hi!')
+```
+
+This if statement will solve it:
+
+```js
+// ...printStars.js
+if (require.main == module) {
+  // Running as a script
+  print(process.argv[2], process.argv[3]);
+} else {
+  // Being required
+  module.exports = print;
+}
+```
+
+Now, we can call both script using
+
+```bash
+node printStars.js 5 hello			# Direct execution of printStar.js, passing in the arguments
+node index.js										# Indirect execution of printStar.js through index.js
+```
+
+
+
+---
 
 **Sources**:
 
