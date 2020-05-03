@@ -343,7 +343,21 @@ One main difference between functional programming (FP) and object-oriented prog
 
 In FP, on the other hand, abstraction is generally pushed as far as possible. Every problem is broken into a series of the simplest possible functions, which are then composed to build the problem solution. Identifying these abstractions is generally the most important part of problem resolution. In fact, FP programmers often spend more time trying to find what problem they should solve than solving them. And of course, it generally appears that these functions are the same from one problem to the next. Only the way they are composed is different. This is the reason why abstraction is one of the most valued techniques used by FP programmers.
 
-## FP
+### OOP
+
+#### ORMs
+
+Object-Relational Mapping is a programming technique for converting data between incompatible type systems using object-oriented programming languages. This creates, in effect, a "virtual object database" that can be used from within the programming language.
+
+Some NodeJS ORMs:
+
++ [Prisma](https://www.prisma.io/)
++ Sequelize
++ ORM2
++ Waterline
++ Bookshelf
+
+### FP
 
 A subset of declarative programming. Uses functions like `.map`, `.reduce` and `.filter`.
 

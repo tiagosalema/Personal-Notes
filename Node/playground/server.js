@@ -1,9 +1,12 @@
-// server.js
-const http = require('http');
-const pid = process.pid; // pid = process id - just to verify that it's running diff processes
+const express = require('express');
 
-http.createServer((req, res) => {
-  for (let i = 0; i < 1e9; i++);
-  res.end(`Handled by process ${pid}`)
+const app = express();
+
+app.use(express.json());
+
+app.post('/notes', (req, res) => {
+  console.log(req.body);
+  res.send('testing')
 })
-  .listen(80, () => console.log(`Started process ${pid}`));
+
+app.listen(3000)

@@ -1,6 +1,8 @@
+Nodejs is a Javascript runtime built on Chrome's V8 JavaScript engine. Node.js uses an event-driven non-blocking I/O model that makes it lightweight and efficient.
 
+Node is not adequate for CPU-intensive tasks
 
-
+Node's event loop and asynchronous I/O, supplied by libuv, is where Node shines in I/O intensive use cases - Node is designed to build scalable network applications (network implies I/O). For the event loop to work properly, Node can't spend too much time doing anything on its own, including work requiring heavy CPU usage (which doesn't mean that Node doesn't have strategies on how to deal with these situations).
 
 # Modules
 
@@ -260,6 +262,8 @@ withTime.execute(fs.readFile, __filename);
 
 + [fs](https://nodejs.org/api/fs.html)
 
++ path
+
 + http
 
   Comprised of 5 main classes:
@@ -331,6 +335,48 @@ withTime.execute(fs.readFile, __filename);
   + Meteor
   + Koa
   + Sails
+  
+  ```js
+  const express = require('express');
+  const app = express();
+  app.use(express.json());
+  
+  app.post('/notes', (req, res) => {
+    console.log(req.body);
+    res.send('testing');
+  });
+  
+  app.listen(3000);
+  ```
+  
+  This snippet will expect a post request to port 3000. If a requets is sent through Postman with a JSON body, it will be printed in the server console.
+  
++ Yargs
+
+  Helps to build interactive command line tools by parsing arguments and generating a UI. Example:
+
+  ```js
+  yargs.command({
+    command: 'add',
+    describe: 'Add new item',
+    builder: {
+      name: { describe: 'Type of item' },
+      price: { describe: 'Item price' }
+    }
+    handler: () => console.log('New item added!')
+  })
+  yargs.parse(); // kind of the same as console.log(process.argv)
+  ```
+
+  ```bash
+  node index.js add --name="My item" --price="10"
+  # New item added!
+  # { _: [ 'add'], name: 'My item', price: '10', '$0': 'index.js' }
+  ```
+
++ dotenv
+
+  To set variables like `NODE_ENV=production`
 
 # Async operations
 
@@ -490,7 +536,7 @@ Instead of writing plain old boring static html, we can use templating languages
 
 # Debugging with Chrome 
 
-1. `node --inspect-brk filename.js` (`brk` stands for break)
+1. `node --inspect-brk filename.js` (`brk` stands for break)  - maybe just `inspect` works - TODO: try it
 2. go to the url `chrome://inspect`
 3. The execution of `filename.js` will be listed there. Click `inspect`.
 
@@ -1070,6 +1116,8 @@ process.on('message', () => process.send(2n ** 1500000n + '')); // n stands for 
 
 ## The Cluster Module
 
+Clustering allows dividing the workload into several processes. If the computer has more than 1 CPU, might as well use the others. One remarkable disadvantage with this is that we no longer have the possibility to cache things in memory, since every worker process has its own memory space. That means that if we are using a cluster setup and want to cache stuff, there should be a dedicated entity responsible to storing all the data. That entity can be a separate database server, a server like redis (in memory cache) or even a dedicated node process with a read/write API with which all other workers communicate with. This doesn't have necessarily to be a disadvantage, since having an independent database is kind of a requirement to have a scalable app. Stateful communication in a cluster setup can also be an issue, since the communication is not guaranteed to be with the same worker. Example: authenticating users: the request to authenticate goes to the master (the load balencer) which forwards it to a worker. When the user makes another request, eventually the master will forward it to another worker, in which the user isn't authenticated. Besides using a common database, a less invasive solution for the code may be using a Sticky Load Balancing, which is nothing more than the master keeping track of to which workers the users were sent for in the first time so that they are sent again to the same ones. This will, naturally, be against the normal distributed clustering behaviour.
+
 ```js
 // server.js
 const http = require('http');
@@ -1137,6 +1185,63 @@ if (cluster.isMaster) {
 
 \* Assures that the worker indeed crashed and wasn't manually killed by the master. The master may have code to evaluate certain factors (e.g. memory use) and  kill some workers if certain thresholds are reached. It's possible to do so by invoking `cluster.kill` or `cluster.disconnect`. These methods will set the argument `worker` variable `exitedAfterDisconnect` to true.
 
+To check how many requests the server wasn't able to serve we can execute the apache benchmark command
+
+```bash
+ab -c200 -t10 http://localhost:80/
+```
+
+which means open this webpage (localhost here) 50.000 thousand times (default i.e. `-n 50000``) with a concurrency of 200 and a 10s to spend for the benchmarking.
+
+### Restart workers manually (new code deploy)
+
+It's ideal to restart the workers one by one to allow other workers to continue to serve requests while one worker is being restarted. A way this can be done is to listen to user signals. `SIGUSR2` is used because`SIGUSR1` is used by node for the debugger. This signal can be triggered by using the `kill` command:
+
+```bash
+kill -SIGUSR2 <xxx>
+```
+
+where `<xxx>` is the process id number, PID (`process.pid`). Notice that this command doesn't kill the process, but rather sends a signal to the process stream.
+
+Windows doesn't support process signals so another approach has to be taken (e.g. standard input or socket input, or monitor the existence of a process PID and watch for a remove event). However, it is recommended to use Linux servers on a production environment instead of Windows - not because of Node itself (which is stable on Windows) but because of other tools that are unstable there. 
+
+```js
+if (cluster.isMaster) {
+  // ...
+ 
+  process.on('SIGUSR2', () => {
+    const workers = Object.values(cluster.worker); // array with all workers
+    
+    const restartWoker = worker_nr => {
+      const worker = workers[worker_nr];
+      if (!worker) return; // stops the recursive function
+      
+      worker.on('exit', () => { // will be triggered when the worker disconnects
+        
+        // in case the disconnection wasn't due to the user call:
+        if (!worker.exitedAfterDisconnect) return; 
+        
+        // exited worker.process.pid
+        cluster.fork().on('listening', () => restartWoker( worker_nr + 1 )); // *
+        
+      })
+      
+      worker.disconnect();
+    }
+    
+    restartWorker(0); // starts the recursive function on the first worker
+  })
+}
+```
+
+\* Since `fork( )` is asynchronous, we have to wait until it starts listening i.e. is connect to restart the new worker.
+
+
+
+### Libraries to use
+
+[`pm2`](https://github.com/Unitech/pm2) makes all the work with cluster easier.
+
 # Networking and Protocols
 
 ## Protocol
@@ -1169,6 +1274,73 @@ It's the language that computers use to speak with each other
 
 
 
+### SSH
+
+To check if there is any set of ssh keys in the current computer:
+
+```bash
+ls -la ~/.ssh
+```
+
+Create ssh keys:
+
+```bash
+ssh-keygen -t rsa -b 2096 -C "some comment"
+```
+
++ `-t` type
++ `-b`  bits - how many
+
+After confirming the defaults asked, 2 files are created in the current machine, under `~/.ssh`: `id_rsa` and `id_rsa.pub`. The former is ours and is not supposed to be shared with anyone. The latter is meant to be shared with servers we want to communicate with e.g. GitHub or Heroku (the text inside it is the key to be pasted in these platforms).
+
+To start the ssh agent:
+
+```bash
+eval "$(ssh-agent -s)" # without quotes on windows
+```
+
+Register the file:
+
+```bash
+ssh-add -K ~/.ssh/id_rsa # don't include the K flag on windows or linux
+```
+
+To check our communication with GitHub:
+
+```bash
+ssh -T git@github.com
+```
+
+To establish a communication with Heroku:
+
+```bash
+heroku login
+heroku keys:add
+
+heroku create tiago-app-name # creates a heroku app called tiago-app-name
+```
+
+To complete the functionality with Heroku:
+
+```js
+const port = process.port.PORT || 8080;
+```
+
+```json
+// package.json
+"scripts": {
+  "start": "node scr/app.js"
+}
+```
+
+And, finally, commit our last git changes to the Heroku repository:
+
+```bash
+git push heroku master
+```
+
+
+
 ## Different kinds of connection
 
 ![comparison of modem with router and gateway combo](https://www.tech21century.com/wp-content/uploads/2019/02/modem-router-gateway.png)
@@ -1182,6 +1354,25 @@ The **mo**dulator - **dem**odulator is the border device that translate the sign
 - Coaxial Cable
 - DSL (Asymmetric Digital Subscriber Line) - uses the same wires as a regular telephone line.
 - Fiber Optic Cable
+
+# Encryption
+
+1. `npm i bcryptjs`
+
+2. ```js
+   const myFunction = async () => {
+     const pass = 'password1';
+     const hashedPass = await bcrypt.hash(pass, 8); // 8 - good security/speed compromise
+     
+     console.log(pass, hashedPass); // ... password1, asdgkhasodgnaosidfgoaskdhaslkd
+     
+     const isMatch = await bcrypt.compare('password1', hashedPass);
+     console.log(isMatch); // ... true
+   }
+   myFunction();
+   ```
+
+3. 
 
 # Other things
 
@@ -1235,3 +1426,4 @@ node index.js										# Indirect execution of printStar.js through index.js
 [Advanced Node.js, by Samer Buna](https://app.pluralsight.com/courses/0d10b83d-4a1c-487e-9da1-e4cbf1bce8ab/table-of-contents)
 
 [jscomplete/advanced-nodejs](https://github.com/jscomplete/advanced-nodejs)
+

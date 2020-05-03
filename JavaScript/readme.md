@@ -1,4 +1,109 @@
 <h1 style="position: absolute; right:0px">Javascript</h1>
+# Asynchronous
+
+## Callbacks
+
+```js
+let x = 0;
+
+const asyncFunc = ( some, arguments, callback ) => {
+  setTimeout( () => callback('It has arrived!'), 1000 )
+}
+
+asyncFunc( 'some', 'arguments', data => {
+	x = data;
+});
+
+console.log(x); // 0
+setTimeout( () => console.log(x), 1001); // It has arrived!
+```
+
+As it's visible in the code above, `asyncFunc` is providing a callback funcion as its 3rd argument. The interesting thing is that this function, when called i.e. 1 second later, is going to be executed in the context where it was defined, thus reassigning `x` to `It has arrived!`.
+
+The problem with callbacks is what is known to be as the callback hell. As a way to fight this, there come promises!
+
+## Promises
+
+```js
+const add = (a, b) => {
+  return new Promise( (resolve, reject) => {
+    setTimeout( () => resolve(a + b), 2000 );
+  });
+}
+```
+
+```js
+add(1, 3)
+  .then( sum => console.log(sum) )
+	.catch(...);
+// ... 2 seconds ...
+// 4
+```
+
+They can also result in a nested look. If we want to call a function after the first async function finishes:
+
+```js
+add(1, 3).then( sum => {
+  console.log(sum);
+	add(sum, 10)
+    .then( sum2 => console.log(sum2) )
+    .catch(...);
+}).catch(...);
+// ... 2 seconds later ...
+// 4
+// ... two seconds later ...
+// 14
+```
+
+To prevent this, we can chain them:
+
+```js
+add(1, 3)
+  .then( sum => {
+    console.log(sum);
+	  return add(sum, 10); // we have to return a Promise for a second then to be available
+  }).then( sum2 => console.log(sum2) )
+	.catch(...);
+// idem
+```
+
+## Async / await
+
+(a more indepth explanation of how async/await works is given in the Generators section)
+
+Although it's easier to work with promises than callbacks, promises can still arguably get quite messy. For that, async/await to the rescue.
+
+Basically, async is a keyword used before the name of a function that will automatically make it return a promise:
+
+```js
+const someFunction = async () => 10; // Promise( <resolved> : 10 )
+```
+
+Which means I can call the `then` on this function:
+
+```js
+someFunction().then( x => console.log(x) ); // 10
+```
+
+Inside a function prefixed by `async` it is possible to assign asynchronous requests to variables as if they were synchronous:
+
+```js
+const someFunction = async () => {
+  const sum1 = await add(1, 3);
+  const sum2 = await add(sum1, 5); // since it has sum1, it will wait for it to have a number
+  return sum2; // what is returned to the then method 
+}
+someFunction().then( x => console.log(x) );
+// ... four seconds later ...
+// 9
+```
+
+Note that the particularity of async/await is that it requires the implementation of a function to return asynchronously what we want from it.
+
+The keyword `await` can be at the start of the line if we don't need a returned value from it.
+
+Another thing to keep in mind is that the `async` keyword actually changes the returned value of the function: from whatever it was to a promise. Keep this in mind if some returned value of a function is being used in the code.
+
 # Spread ...
 
 Transforms an array into its singularities

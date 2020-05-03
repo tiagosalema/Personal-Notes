@@ -4,7 +4,7 @@
 
 The big advantage of React is the fact that it has a **virtual DOM**, which is a perfect copy of the DOM with the exception that it is much lighter than it because it lacks the necessary functionality to be actually displayed on the screen. This way, the virtual DOM is modified by each task before the real one and it can be then compared with the virtual DOM with no modifications. Only then the differences between these virtual DOMs is applied to the real DOM. Because of that, if the task doesn't do any difference, <u>absolutely no change is made to the DOM</u>.
 
-**Start a react file:**
+# Get Started
 
 1. `create-react-app NomeDaPasta` (if it doesn't work, do before `npm i -g create-react-app`)
 
@@ -27,7 +27,20 @@ import ReactDOM from 'react-dom';
 
 `ReactDOM` is gonna be used to render the virtual DOM (everything before `ReactDOM.render()`) into the DOM.
 
+## From scratch
 
+i.e. not using `create-react-app`
+
+Development dependencies:
+
++ eslint
+
+Production dependencies:
+
++ express
++ ejs - template work on the server side
++ pm2 - `npm run dev && yarn pm2 logs`
++ 
 
 # JSX
 
