@@ -1242,21 +1242,70 @@ if (cluster.isMaster) {
 
 [`pm2`](https://github.com/Unitech/pm2) makes all the work with cluster easier.
 
-# Networking and Protocols
+# Networking
 
-## Protocol
+The Open Systems Interconnection model (OSI model) is a conceptual model that characterises and standardises the communication functions of a telecommunication or computing system without regard to its underlying internal structure and technology. Its goal is the interoperability of diverse communication systems with standard communication protocols. The model partitions a communication system into abstraction layers.
 
-It's the language that computers use to speak with each other
+A protocol is a set of rules that layers use to communicate with each other.
 
-+ HTTP - Browse web pages
-+ HTTPS - Browse web pages with encryption
-+ IP - Internet Protocol - **Networking** protocol - responsible for getting data from one machine to another over the internet
-+ TCP - Transmission Control Protocol - **Transport** protocol - responsible for ensuring data arrives intact or requesting retransmission if not (TCP/IP - "TCP via IP", TCP being the transport protocol that uses IP as the networking protocol)
-+ UDP - **Transport** protocol - User Diagram Protocol - used for info that requires no response (mainly for streaming)
+## OSI model
+
+The Open Systems Interconnection model (OSI model) is a conceptual model that characterises and standardises the communication functions of a telecommunication or computing system without regard to its underlying internal structure and technology. Its goal is the interoperability of diverse communication systems with standard communication protocols. The model partitions a communication system into abstraction layers. The original version of the model had seven layers.
+
+The software layer (aka upper layer) is comprised of layers 7, 6 and 5 whereas the hardware layer (aka lower layer) of layers 3, 2 and 1. 
+
+## 7 - Application Layer (message)
+
+The UI, where users interact. Provides the services/protocols that work with the data the user is exchanging.
+
++ HTTP - HyperText Transfer Protocol Browse web pages
++ HTTPS - HTTP Secure Browse web pages with encryption
++ FTP - File Transfer Protocol
 + SMTP - Simple Mail Transport Protocol - send and receive emails
 + IMAP, POP3 - load emails from inbox
++ DNS - Domain Name Server
++ Telnet
++ Netcat
++ SSH
+
+## 6 - Presentation Layer (message)
+
+The presentation/syntax layer translates data between the application layer and the network format.
+
++ Encrypts/decrypts data
++ Ensure the data is accurate, well-defined and in a standardized format
++ Character/string conversion
++ Data compression
++ Graphic handling
+
+## 5 - Session Layer (message)
+
+Maintains distinction between data of separate apps. Provides dialog control between hosts.
+
+## 4 - Transport Layer (message)
+
+Provides end-to-end connection. Provides reliable or unreliable delivery and flow control.
+
++ TCP - Transmission Control Protocol - **Transport** protocol - responsible for ensuring data arrives intact or requesting retransmission if not (TCP/IP - "TCP via IP", TCP being the transport protocol that uses IP as the networking protocol)
++ UDP - **Transport** protocol - User Diagram Protocol - used for info that requires no response (mainly for streaming)
+
+## 3 - Network Layer (packets)
+
+Provides Logical Addressing. Provides Path determination using logical addressing.
+
++ IP - Internet Protocol - **Networking** protocol - responsible for getting data from one machine to another over the internet
+
+## 2 - Data Link Layer (frames)
+
+Provides media access and physical addressing.
+
+## 1 - Physical Layer (bits)
+
+Converts the data digital bits into electrical, radio, or optical signals so that it can be transferred over the medium.
+
+
+
 + IRC - chat
-+ FTP - File Transfer Protocol
 + SNMP - Simple Network Management Protocol - used to collect system information from a remote computer
 + Telnet - used to perform commands on a remote computer
 + SSH - remote shell over an encrypted connection
@@ -1357,22 +1406,22 @@ The **mo**dulator - **dem**odulator is the border device that translate the sign
 
 # Encryption
 
-1. `npm i bcryptjs`
+`npm i bcryptjs`
 
-2. ```js
-   const myFunction = async () => {
-     const pass = 'password1';
-     const hashedPass = await bcrypt.hash(pass, 8); // 8 - good security/speed compromise
-     
-     console.log(pass, hashedPass); // ... password1, asdgkhasodgnaosidfgoaskdhaslkd
-     
-     const isMatch = await bcrypt.compare('password1', hashedPass);
-     console.log(isMatch); // ... true
-   }
-   myFunction();
-   ```
+```js
+const myFunction = async () => {
+  const pass = 'password1';
+  const hashedPass = await bcrypt.hash(pass, 8); // 8 - good security/speed compromise
+  
+  console.log(pass, hashedPass); // ... password1, asdgkhasodgnaosidfgoaskdhaslkd
+  
+  const isMatch = await bcrypt.compare('password1', hashedPass);
+  console.log(isMatch); // ... true
+}
+myFunction();
+```
 
-3. 
+
 
 # Other things
 

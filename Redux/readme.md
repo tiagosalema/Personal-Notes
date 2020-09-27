@@ -43,7 +43,7 @@ const someReducer = (valueInStore = null, action) => {
 }
 ```
 
-+ Must return a value besides undefined.
++ Must return a value ≠ undefined.
 
 + All reducers run exactly one time when the app starts. For this run, `valueInStore` is undefined, which is why we override this value with `null` (could be anything else, like `[]`,`''`,`0`, etc.)
 

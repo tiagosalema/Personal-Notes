@@ -238,7 +238,7 @@ Person.prototype = {
 
 These are 2 types of properties: **own** and **prototype** properties.
 
-Every time an instance of an object is created by utilizing the `new` keyword, a special property is created: the `constructor`property, whose name will be the name of the function (`tiago.constructor === Person` is true). The downside of creating a prototype by hand is that it erases the `constructor` property, since it was on the prototype that the constructor was created in the first hand. To fix this, whenever a prototype is manually set to a new object, remember to define the `constructor` property:
+Every time an instance of an object is created by utilizing the `new` keyword, a special property is created: the `constructor`property, whose name will be the name of the function (`tiago.constructor === Person` is true). The downside of creating a prototype by hand is that it erases the `constructor` property, since it was on the prototype that the constructor was created in the first place. To fix this, whenever a prototype is manually set to a new object, remember to define the `constructor` property:
 
 ```javascript
 Person.prototype = {

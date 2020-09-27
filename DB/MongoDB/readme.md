@@ -156,7 +156,36 @@ const User = mongoose.model('User', {
 module.exports = User;
 ```
 
-to use this model:
+As is visible in the code above, to create a model we use the `model` method of the mongoose library and give to it 2 arguments: a name for the model (User) and a schema of that object. If we would like to apply a middleware to this schema (e.g. to encrypt or hash the provided password), we should provide the to `model` the mongoose built-in Schema as the 2nd argument instead:
+
+```js
+const userSchema = new mongoose.Schema({
+  name: ...,
+  age: ...,
+  email: ...
+});
+
+// use middleware here i.e. userSchema.pre or userSchema.post
+
+const User = mongoose.model('User', userSchema)
+```
+
+There are some mongoose functions that bypass the middleware e.g. `findByIdAndUpdate`. Example of middleware implementation: 
+
+```js
+userSchema.pre('save', async function (next) { // cannot be arrow function to bind 'this'
+  const user = this;
+  if (user.isModified('password')) { // only hash password if it was created/modified
+    user.password = await bcrypt.hash(user.password, 8);
+  }
+  
+  next(); // signals the middleware has finished
+})
+```
+
+
+
+To use this model:
 
 ```js
 //  index.js
@@ -214,7 +243,7 @@ app.post('/users', (req, res) => {
     if(!isAllowed) return res.status(404).send({ error: 'Update not allowed.'});
     
     try {
-      const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+      const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true }); // *
       if (!user) return res.status(404).send()l
       res.send(user);
     } catch (e) {
@@ -234,6 +263,16 @@ app.post('/users', (req, res) => {
   })
 });
 ```
+
+\* This function bypasses middleware. If we were to write it in a way that wouldn't:
+
+```js
+const user = await User.findById(req.params.id);
+allowedParams.forEach(param => user[update] = req.body[update] );
+await user.save();
+```
+
+
 
 Notice that it is not necessary to convert the string id into an ObjectID, as it was for mongodb, since mongoose is doing that for us.
 
@@ -274,4 +313,30 @@ app.use(userRouter);
 // app.user(anotherRouter);
 ```
 
-??Instead of having all the related APIs sparse throughout the file, we can group them. It's more organized. Notice how all the CRUD operations we did in the snippet above were targeting the same route `/users`. We can group them this way:
+## Useful snippets
+
+### Login
+
+```js
+router.post('/users/login', async (req, res) => {
+  try {
+    // findByCredentials is a custom method
+    const user = await User.findByCredentials(req.body.email, req.body.password);
+    res.send(user);
+  } catch(e) {
+    res.status(500).send();
+  }
+});
+
+// models/user.js
+userSchema.statics.findByCredentials = async (email, password) => {
+  const user = await User.findOne({ email });
+  if (!user) throw new Error('Login unsuccessful.');
+  
+  const isMatch = await bcrypt.compare(password, user.password);
+  if(!isMatch) throw new Error('Login unseccessful.')
+  
+  return user;
+}
+```
+
