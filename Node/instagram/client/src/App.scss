@@ -1,0 +1,93 @@
+.form {
+  margin: auto;
+  width: 400px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  background: rgb(241, 241, 244);
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  > * {
+    padding: 15px 0;
+    font-size: 16px;
+    &::placeholder {
+      opacity: 0.5;
+    }
+  }
+  input,
+  textarea {
+    width: calc(100% - 30px);
+    height: 20px;
+    padding: 10px;
+    border: none;
+    margin-top: 10px;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+
+    &[type="text"],
+    &[type="email"],
+    &[type="password"] {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      transition: border-bottom 0.3s;
+      &:focus {
+        border-bottom: 2px solid rgb(112, 169, 189);
+      }
+    }
+    &.invalid {
+      border-bottom: 1px solid rgba(255, 0, 0, 0.5);
+    }
+    &[type="file"] {
+      &::placeholder {
+        display: none;
+      }
+    }
+  }
+  button {
+    margin: auto;
+    text-transform: uppercase;
+    background: rgb(112, 169, 189);
+    color: white;
+    margin-top: 20px;
+    padding: 10px 30px;
+    font-weight: bold;
+    border-radius: 2px;
+  }
+  a {
+    text-align: right;
+    font-size: 12px;
+    color: #000;
+  }
+}
+
+nav {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background: rgb(141, 189, 198);
+  box-shadow: 0 3px 2px rgba(0, 0, 0, 0.4);
+
+  a {
+    text-decoration: none;
+    font-size: 20px;
+    color: rgb(14, 28, 82);
+    font-weight: bold;
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      background: rgb(160, 204, 210);
+    }
+
+    &:first-child {
+      margin-right: auto;
+    }
+  }
+}
+
+h1 {
+  text-align: center;
+  margin: 70px;
+}
