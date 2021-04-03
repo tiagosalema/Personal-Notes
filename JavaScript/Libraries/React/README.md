@@ -589,56 +589,175 @@ Widely used library, usually to handle with numbers.
 
 # Routing
 
-In React, a route  a component that accepts 2 attributes:  `path` and `component`. The special thing about the Route component is that it will return the component specified by the `component` attribute if the path specified in the url matches the one specified in the `path` attribute. If that's the case, the Component will be returned exactly where the Route component is located.
+Route returns its component if its path matches the url.
 
 1. `npm i react-router-dom` 	(`npm i react-router-native` for native apps)
 
 2. ```jsx
-   // index.js
-   import { BrowserRouter } from 'react-router-dom';
+   import {
+     BrowserRouter as Router,
+     Route,
+     Link
+   } from 'react-router-dom';
    
-   ReactDOM.reder(
-   	<BrowserRouter>
-     	<App />
-   	</BrowserRouter>,
-   	document.getElementById('root')
+   const Home = () => <h2>Home</h2>;
+   const About = () => <h2>About</h2>;
+   const Contacts = () => <h2>Contacts</h2>;
+   
+   ReactDOM.render(
+     <Router>
+       
+       <nav>
+         <Link to="/">						Home			</Link>
+         <Link to="/about">			About			</Link>
+       	<Link to="/contacts">		Contacts	</Link>
+        </nav>
+   
+        <Switch>
+          <Route exact path="/">			<Home />				</Route>
+          <Route path="/about">			<About />				</Route>
+          <Route path="/contacts">		<Contacts />		</Route>
+        </Switch>
+   
+     </Router>,
+     document.getElementById('root')
    );
    ```
 
-   ```jsx
-   import { Route } from 'react-router-dom';
-   
-   <Route path="/..." component={...} />
-   ```
-
-   Since some paths match the URI more than what they should (e.g. `/` matches all routes, not just the homepage), adding `exact` to that `Route` or surround all the `Route` components by a `Switch` are viable solution, which will make it render just the first `path` match.
-
-   Each one of the URIs is reached via the react-router-dom components `<Link>` (or `<NavLink>` if the link is to be highlighted when active - use `exact` for the homepage NavLink).
-
    
 
-   ## Not Found
+The next 2 scripts are equivalent:    
 
    ```jsx
-   <Route path="/not-found" component={ NotFound } />
-   <Route path="/" exact component={Home}></Route>
-   <Redirect to="/not-found" />
+<Route path="/about">
+  <About />
+</Route>
    ```
 
-   If random text is written after the `/`, the home page will be rendered, since it satisfies the condition of having `/`. It is desired to redirect to a ***Not Found*** page. For that, the `exact` attribute should be added to the `Route`  and after it `<Redirect to="/not-found" />` (imported from the *react-router-dom* library).
-
-   It is also possible to redirect from a specific url: 
-
-   ```jsx
-   <Redirect from='/messages' to='/inbox' />
-   ```
-
-   
+```jsx
+<Route path="/about" component={ About } />
+```
 
 
-## Standard Route Props
 
-There are 3 props standard props within a Route:
+`<Link>` can be replaced by `<NavLink>` if the link is to be highlighted when active.
+
+To account for non-matching URIs:
+
+```jsx
+<Route path="/not-found" component={ NotFound } />
+<Route path="/" exact component={Home}></Route>
+<Redirect to="/not-found" />
+```
+
+It is also possible to redirect from a specific url: 
+
+```jsx
+<Redirect from='/messages' to='/inbox' />
+```
+
+
+
+## URL parameters
+
+```jsx
+const Child => () => {
+  let { id } = useParams(); // useParams returns an object with all the url variables
+  return <h3>ID: {id}</h3>;
+}
+
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useParams
+} from "react-router-dom";
+
+export default function ParamsExample() {
+  return (
+    <Router>
+      <nav>
+        <Link to="/a">A</Link>
+        <Link to="/b">B</Link>
+        <Link to="/c">C</Link>
+      </nav>
+
+      <Switch>
+        <Route path="/:id" children={<Child />} />
+      </Switch>
+    </Router>
+  );
+}
+```
+
+
+
+## [Nesting](https://reactrouter.com/web/example/nesting) - useRouteMatch
+
+
+
+```jsx
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useParams,
+  useRouteMatch
+} from "react-router-dom";
+
+const Home() => <h2>Home</h2>;
+
+const Topic = () => {
+  let { topicId } = useParams();
+  return <h3>{topicId}</h3>;
+}
+
+const Topics = () => {
+  let { path, url } = useRouteMatch(); // path relative to the parent route; url is a relative link
+  return (
+    <>
+      <h2>Topics</h2>
+    
+      <nav>
+        <Link to={`${url}/rendering`}>Rendering with React</Link>
+        <Link to={`${url}/components`}>Components</Link>
+        <Link to={`${url}/props-v-state`}>Props v. State</Link>
+			</nav>
+    
+      <Switch>
+        <Route exact path={path}> 	<h3>Select a topic...</h3> 		</Route>
+        <Route path={`${path}/:topicId`} component={ Topic } />
+      </Switch>
+    </>
+  );
+}
+
+export default function NestingExample() {
+  return (
+    <Router>
+      
+      <nav>
+      	<Link to="/">Home</Link>
+        <Link to="/topics">Topics</Link>
+      </nav>
+      
+      <Switch>
+      	<Route exact path="/" component={ Home } />
+        <Route path="/topics" component={ Topics } />
+      </Switch>
+      
+    </Router>
+  );
+}
+```
+
+
+
+**Props:**
 
 + **history**
   + `push`: `this.props.history.push('/home');` pushes the user to the specified route. This way, if the user goes back in the page, the previous page is gonna be displayed.
@@ -927,9 +1046,15 @@ ReactDOMServer.renderToString(<App />);
 
 Hooks are a way that React implemented so that it would be possible to use all the time stateless functional components instead of components. SFC are advantageous when it comes to rendering speeds.
 
+## useState
+
 ## useEffect
 
-Equivalent of ComponentDidMount and ComponentWillUnmount 
+`useEffect(fn)`
+
+`fn` triggered every time the component containing it renders (including after first render). If `fn` returns a function, that function will be triggered when the component unmounts.
+
+ComponentDidMount, componentDidUpdate and ComponentWillUnmount in a single hook.
 
 ````react
 import{ useEffect } from react;
@@ -946,7 +1071,27 @@ useEffect(()=>{
 
 ## useContext
 
-A context provider receives a single `value` prop, like `<MyContext.Provider value={42}>`. Child components may consume the context by rendering the context consumer component and providing a render prop, like:
+A context provider receives a single `value` prop:
+
+```jsx
+import { useEffect, createEffect } from 'react'
+const UserContext = createContext() 
+
+const App = () => {
+  return (
+    <MyContext.Provider value={42}>
+      <SomeComponent />
+    </MyContext.Provider>
+  )
+}
+```
+
+```js
+// SomeComponent.js
+const value = useContext(MyContext)
+```
+
+or
 
 ```jsx
 <MyContext.Consumer>
@@ -954,11 +1099,21 @@ A context provider receives a single `value` prop, like `<MyContext.Provider val
 </MyContext.Consumer>
 ```
 
-or by calling the `useContext` hook in a function component:
+## useReducer
 
-```js
-const value = useContext(MyContext)
-```
+## useCallback
+
+## useMemo
+
+## useRef
+
+## useImperativeHandle
+
+## useLayoutEffect
+
+## useDebugValue
+
+
 
 # element-react
 

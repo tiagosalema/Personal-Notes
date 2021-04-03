@@ -22,3 +22,10 @@ If it's not possible to push because there were changes done remotely:
 
 + `git pull --rebase origin master`
   After executing this once, t
+
+
+
+## Useful snippets
+
++ `git log --oneline --decorate --graph --all` -- logs all branches in a graph
++ 

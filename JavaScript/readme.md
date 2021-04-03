@@ -378,7 +378,7 @@ Note that `b` has a method in it called `next`. This means that the Generator ge
 
 A peculiarity with generators is the fact that they not only start from the line they returned, but also from the exact place where `yield` is located. This means that
 
-```js
+```javascript
 function *a(i) {
   yield "hello";
   let b = yield "world";
