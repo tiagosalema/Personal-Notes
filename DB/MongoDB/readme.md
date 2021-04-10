@@ -285,6 +285,35 @@ User.findByIdAndDelete('sadkjhfgas')
 	.catch( e => console.log(e) );
 ```
 
+
+
+## Query
+
+Consider the following query:
+
+```js
+const query = Person
+	.find({ ocupation: /engineer/ })
+	.where('name.last').equals('Xavier')
+	.where('age').gt(17).lt(66)
+	.limit(10)
+	.sort('-occupation')
+	.select('name occupation')
+```
+
+
+
+There are 2 ways of getting the result from this query:
+
+1. `const res = await query;`
+2. `query.exec((err,res) => console.log(res))`
+
+
+
+**Note**: A way to return cached data from Redis is to intercept the built-in Mongoose function `exec` and modify its normal behaviour (check if Redis key with data already exists: if so, return cache; otherwise return `exec`)
+
+
+
 ## Routing
 
 Instead of calling all these endpoints on the app, it makes more sense to apply them in a dedicated route that will, in turn, be appended to the app. This can be achieved my doing the following:

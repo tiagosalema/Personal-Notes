@@ -1191,7 +1191,7 @@ To check how many requests the server wasn't able to serve we can execute the ap
 ab -c200 -t10 http://localhost:80/
 ```
 
-which means open this webpage (localhost here) 50.000 thousand times (default i.e. `-n 50000``) with a concurrency of 200 and a 10s to spend for the benchmarking.
+which means open this webpage (localhost here) 50.000 thousand times (default i.e. `-n 50000`) with a concurrency of 200 and a 10s to spend for the benchmarking.
 
 ### Restart workers manually (new code deploy)
 
