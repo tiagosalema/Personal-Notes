@@ -1,6 +1,30 @@
+# Initial setup
+
+```js
+const redis = require('redis');
+const client = redis.createClient();
+
+// as client.get expects a callback, we'll make it return a promise instead
+const { promisify } = require('util');
+client.get = promisify(client.get);
+
+const cachedPosts = await client.get('posts');
+if (cachedPosts) {
+	console.log('serving from cache');
+  return res.json(JSON.parse(cachedPosts));
+} else {
+  // server logic to return posts
+	console.log('serving from mongoDB');
+  client.set('posts', JSON.stringify(posts));
+}
+```
 
 
-#SET
+
+# Commands
+
+##SET
+
 ```js
 client.set('country', 'Portugal');
 ```
@@ -13,7 +37,7 @@ client.set('country', 'Portugal', 'EX', 60);
 
 
 
-#GET
+##GET
 
 ```js
 client.get('country', console.log)
@@ -21,7 +45,7 @@ client.get('country', console.log)
 
 
 
-#HMSET
+##HMSET
 
 **H**ash **M**ap **SET**
 
@@ -43,7 +67,7 @@ Values in Redis can also be lists, sets (which are unsorted), sorted sets, hyper
 
 
 
-#HGETALL
+##HGETALL
 
 ```js
 client.hgetall('countries', console.log)
@@ -51,7 +75,7 @@ client.hgetall('countries', console.log)
 
 
 
-#RPUSH
+##RPUSH
 
 ```js
 client.rpush(['countries', 'Portugal', 'Spain'], console.log)
@@ -61,7 +85,7 @@ This creates a list called `countries` and pushes two elements to it
 
 
 
-#LRANGE
+##LRANGE
 
 Retrieves the elements of a list.
 
@@ -71,7 +95,7 @@ client.lrange('countries', 0, -1, console.log) // ['Portugal', 'Spain']
 
 
 
-#SADD
+##SADD
 
 Same as `RPUSH`, but doesn't allow duplicates i.e. stores sets instead of arrays.
 
@@ -81,7 +105,7 @@ client.sadd(['countries', 'Portugal', 'Portugal', 'Spain'], console.log)
 
 
 
-#SMEMBERS
+##SMEMBERS
 
 Retrieves members of the set. The order isn't preserved.
 
@@ -91,7 +115,7 @@ client.smembers('countries', console.log)
 
 
 
-#EXISTS
+##EXISTS
 
 ```js
 client.exists('cities', console.log)
@@ -99,7 +123,7 @@ client.exists('cities', console.log)
 
 
 
-#DEL
+##DEL
 
 ```js
 client.del('countries', console.log)
@@ -107,7 +131,7 @@ client.del('countries', console.log)
 
 
 
-#INCR
+##INCR
 
 Increments a given key by 1.
 
