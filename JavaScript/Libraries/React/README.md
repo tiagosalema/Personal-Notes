@@ -4,30 +4,25 @@
 
 The big advantage of React is the fact that it has a **virtual DOM**, which is a perfect copy of the DOM with the exception that it is much lighter than it because it lacks the necessary functionality to be actually displayed on the screen. This way, the virtual DOM is modified by each task before the real one and it can be then compared with the virtual DOM with no modifications. Only then the differences between these virtual DOMs is applied to the real DOM. Because of that, if the task doesn't do any difference, <u>absolutely no change is made to the DOM</u>.
 
-**Start a react file:**
+# Get Started
 
-1. `create-react-app NomeDaPasta` (if it doesn't work, do before `npm i -g create-react-app`)
-
-2. `npm start`
-
-3. install bootstrap: `npm i bootstrap` and import in `index.js`:
-
-   `import 'boostrap/dist/css/bootstrap.css';`
+1. `npx create-react-app folderName`
+2. `cd folderName`
+3. `npm start`
 
 
-
-Always start by:
 
 ```react
 import React from 'react';
+```
+
+Compiles JSX into JS (JSX is html embedded in JS).
+
+```js
 import ReactDOM from 'react-dom';
 ```
 
-`React` is gonna be used to compile JSX into JS (JSX is html embedded in JS).
-
-`ReactDOM` is gonna be used to render the virtual DOM (everything before `ReactDOM.render()`) into the DOM.
-
-
+Renders the virtual DOM (everything before `ReactDOM.render()`) into the DOM.
 
 # JSX
 
@@ -45,124 +40,48 @@ React.createElement(
 );
 ```
 
-which can, now, be parsed by the browser.
+which can now be parsed by the browser.
 
-For this reason, it is necessary that the initial tag is the same as the final (otherwise, React wouldn't know what to put in the first entry of `.createElement`). A workaround is to involve the JSX in a `<div></div>`. The inconvenience is that this div may be useless in the html, for which case one can use `<React.Fragment></React.Fragment>` instead.
+For this reason, it is necessary that the initial tag is the same as the final (otherwise, React wouldn't know what to put in the first entry of `.createElement`). A workaround is to involve the JSX in a `<div></div>`. The inconvenience is that this div may be useless in the html, for which case one can use `<React.Fragment></React.Fragment>` instead, or simply `<></>`.
 
-
-
-Self closing tags have to be closed in jsx: `/> `  (it's not optional, like in html). Examples:
+Self closing tags have to be closed in jsx: `/> `  (it's not optional, like in html).
 
 ```react
 <img src='...' />
 <br />
 ```
 
-
-
-## Styling elements
-
-The `style` attribute of an element in JSX is defined as follows:
-
-```jsx
-class x extends Component {
-    styles = {
-        // properties written in camelCase
-        fontSize: 10, // JSX automatically converts 10 to '10px'
-        fontWeight: 'bold'
-    };
-
-    render() {
-        return <span style={this.styles}>Hello</span>
-    }
-}
-```
-
 # Components
-
-Components contain pieces of code that are to be repeatedly used.
-
-A component class is like a factory that builds components, which can only be created by extending an already existing React component:
-
-```react
-class MyComponentClass extends React.Component {
-    ...
-}
-```
-
-
-
-`React.Component` is a class that represents a raw component - kind of a factory of components. It is also possible to extend an existing component:
-
-```react
-class AnotherComponentClass extends MyComponentClass {
-    ...
-}
-```
-
-**extending** is how one **subclass**es an existing class.
-
-Component class variable names must begin with capital letters, such like all other class names, which are written in UpperCamelCase.
-
-
-
-The body of the class will include the state object, which consists of all the variables to be used in the class; and the instructions (aka instances) for how to build the component, among which, the render:
-
-```react
-class MyComponentClass extends React.Component {
-  state = {};
-  render() {
-    return <h1>Hello world</h1>;
-  }
-}
-```
-
-The component is then applied this way:
-
- ```react
-ReactDOM.render(
-	<MyComponentClass />, 
-	document.getElementById('app')
-);
- ```
-
-
 
 To update a variable defined in the state object, it isn't enough to set it with a different value. It is necessary to invoke the `setState` method to this:
 
-```react
-state = {
-    count: 0
-}
+```jsx
+state = { count: 0 }
 
-handleIncrement = () => {
-    this.setState( {count: this.state.count + 1} )
-}
+handleIncrement = () => this.setState( {count: this.state.count + 1} )
 ```
-
-It is necessary to use an arrow function here because otherwise `this` would result in `undefined`, since it will just be defined when used inside objects.
 
 
 
 It is possible to add properties to `<MyComponentClass />` like so:
 
 ```react
-<MyComponentClass key={.} prop1={.} prop2={.} ... />
+<MyComponentClass key={...} prop1={...} prop2={...} ... />
 ```
 
-and these properties can be used freely. If no value is assigned to a prop, than it will be equal to true.
+If a property isn't assigned a value, it defaults to `true`.
 
 
 
 ## 	Higher Order Components (HOC)
 
-HOC are functions that receive a component and return a pumped version of it.
+HOC are functions that receive a component and return a *pumped* version of it.
 
 ```javascript
 const EnhancedComponent = higherOrderComponent(WrappedComponent);
 ```
 
-Let's build a HOC:
+Example:
 
 ```react
 const randomHOC = WrappedComponent => props => <WrappedComponent {...props} />;
@@ -175,13 +94,13 @@ To inject logic in the HOC:
 ```react
 const randomHOC = WrappedComponent => {
   // some logic goes here
-  return props => (   //if WrappedComponent originally receives props, we have to give them again
+  return props => (
   	<WrappedComponent {...props} /> // *
   )
 }
 ```
 
-`*` It is here that we add the enhancing things we want to add to the component. We can either give it extra props by doing `<WrappedComponent {...props, extraProp} />` or involve the `WrappedComponent `in a div with a class:
+`*` where we customize the component. We can either give it extra props by doing `<WrappedComponent {...props, extraProp} />` or involve the `WrappedComponent `in a div with a class:
 
 ```react
 <div className="...">
@@ -235,9 +154,7 @@ Here, `isLoading` is being extracted from the props and used for the logic of th
 The attributes of a component, or **prop**ertie**s**, can be accessed by functions:
 
 ```react
- function Message(props) {
-        return <p>Hello {props.text}</p>;
-    }
+ const Message = props => <p>Hello {props.text}</p>;
 ```
 
 or classes:
@@ -250,27 +167,13 @@ class Message extends React.Component {
 }
 ```
 
-Both of which will be rendered this way:
-
 ```react
-ReactDOM.render(
-    <Message text="World" />,
-    document.getElementById("root")
-)
+<Message text="World" /> // <p>Hello world</p>
 ```
-Here, the Message tag has the *text* property, which went as an input to the function/class that defined it. <u>Note the required usage of `this` in the class.</u>
+The props can contain JSX
 
-The props can contain JSX, e.g. `<Component title={<h1>Intro</h1>} />`, which will be invoked like:
-
-```react
-render() {
-	return (
-    <Component>
-    	{props.title}
-        <p>The intro goes like...</p>
-    </Component>
-  );   
-}
+```jsx
+<Message text={<span>world</span>} />
 ```
 
 
@@ -278,9 +181,11 @@ render() {
 **All React components must act like pure functions with respect to their props**, i.e. they cannot be changed. State, on the other hand, allows React components to change their output over time.
 
 ```react
-function pureFunc (a, b) { return a + b; }
-function impureFunc (account, amount) { account.total -= amount; }
+const pureFunc = (a, b) => a + b;
+const impureFunc = (account, amount) => account.total -= amount;
 ```
+
+
 
 The following are the same:
 
@@ -298,13 +203,10 @@ There are some variables that are global to the whole app. It would be cumbersom
 ```jsx
 import * as React from 'react';
 
-// React.createContext accepts a defaultValue as the first param (if another isn't explicited)
 export const MyContext = React.createContext(defaultValue); 
 
 class Parent extends React.Component {
-  doSomething = (value) => {
-    // Do something here with value
-  };
+  doSomething = value => { ... };
 
   render() {
     const var = "hello world!";
@@ -321,23 +223,17 @@ class Parent extends React.Component {
 class Child extends React.Component {
   static contextType = MyContext; // necessary where the context is used
 
-  onClick = () => {
-    this.context.doSomething(this.props.value); // Child has access to this.context
-  };      
-
+  onClick = () => this.context.doSomething(this.props.value);
+	// Child has access to this.context
+        
   render() {
-    return (
-      <>
-      	<div onClick={this.onClick}>{this.props.value}</div>
-      	<
-      </>
-    );
+    return <div onClick={this.onClick}>{this.props.value}</div>;
   }
 }
 ```
 
 ```jsx
-import { MyContext } from './xxx';
+import { MyContext } from './...';
 
 class SomeComponent extends React.Component {
   render() {
@@ -345,15 +241,15 @@ class SomeComponent extends React.Component {
       <Parent>
         <Child value={1} />
         <Child value={2} />
-        <MyContext.Consumer>{( {var} ) => <p>{var}</p>}</MyContext.Consumer> 	// has access to var
+        <MyContext.Consumer>{ props => <p>{props.var}</p>}</MyContext.Consumer>
       </Parent>
     )}
 }
 ```
 
-As seen above, there are 2 ways to make variables / methods available throughout the app:
+As seen above, there are 2 ways to make variables/methods available throughout the app:
 
-1. write `static contextType = MyContext;` at the top of the script and access everything through `this.context` (the one mentioned in React documentation)
+1. write `static contextType = MyContext;` at the top of the script and access everything through `this.context`
 2. involve whatever in a `Consumer` component.
 
 ## 	Containment
@@ -394,10 +290,6 @@ It is possible to inject children variables to their parent component. For that,
   ```javascript
   { React.Children.map(this.props.children, child => React.cloneElement( child, { var: _ } )) }
   ```
-
-
-
-
 
 # State
 
@@ -496,50 +388,15 @@ function FormattedDate(props) {
 
 **Challenge:** To understand [this](http://codepen.io/gaearon/pen/zKRqNB?editors=0010) code (or [this one](https://codepen.io/gaearon/pen/zKRGpo?editors=0010), which is simpler).
 
-
-
-# Events
-
-[List of events](https://reactjs.org/docs/events.html#supported-events)
-
-```react
-function ActionLink() {
-  function handleClick(e) {
-    e.preventDefault();
-    console.log('The link was clicked.');
-  }
-
-  return <a href="#" onClick={ handleClick }> Click me </a>;
-}
-```
-
-Things to note:
-
-* Events are written in camelCase instead of lowercase, such it is for html
-* Likewise, a function is passed as the event handler rather than a string: `onclick="handleClick()"`
-* It isn't necessary to initialize the function `()`
-* It's not necessary to call an `.addEventListener` to the DOM element. The attribute to the element to be rendered is enough.
-
-[Button ON/OFF](https://codepen.io/gaearon/pen/xEmzGg?editors=0010)
-
 # Lists
 
-```react
-const numbers = [1, 2, 3, 4, 5];
-const list = numbers.map( number => <li>{number}</li> );
-ReactDOM.render(
-  <ul>{list}</ul>,
-  document.getElementById('root')
-);
-```
-
-Note: because of the way React works, it is necessary to add keys to each item. It is advisable not to use their index as this key, but some key generator instead ([uuid](https://www.npmjs.com/package/uuid) or [shortid](https://www.npmjs.com/package/shortid)). Using their index as a key is only acceptable if the list doesn't change its order.
+It is necessary to add keys to each item. It is advisable not to use their index as this key, but some key generator instead ([uuid](https://www.npmjs.com/package/uuid) or [shortid](https://www.npmjs.com/package/shortid)). Using their index as a key is only acceptable if the list doesn't change its order.
 
 # Lifecycle methods
 
-The classes extended from React.Components have built-in methods that are useful to be used. These special methods are called lifecycle methods. The `constructor()` and `render()` methods are 2 examples of lifecycles, being the latter the only one that must be defined in a class. This method will be called each time an update happens.
+React.Components built-in methods aka lifecycle methods. The `constructor()` and `render()` methods are 2 examples of lifecycles (the latter is the only one that must be defined in a class, since it is called each time the component is updated).
 
-Other examples of lifecycle methods:
+ <p style="text-align: center;"><a href="http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/">Diagram</a>
 
 ## 	componentDidMount()
 
@@ -590,50 +447,6 @@ Deprecated, since using this lifecycle method often leads to bugs and inconsiste
 
 The component will, by default, re-render every time it receives new props, even if they are the same. In this lifecycle method it is possible to prevent it from doing so by comparing the current `this.props` to the `nextProps`. This method must return a `boolean` that will tell React whether or not to re-render the component.
 
-![1541277914837](C:\Users\tiago\AppData\Roaming\Typora\typora-user-images\1541277914837.png)
-
- <p style="text-align: center;"><a href="http://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/">Image source</a>
-
-
-
-*Mounting* is the normal event that create a class. *Updating* happens when either the state or props is changed. *Unmounting* is called when a component is being removed from the DOM.
-
-
-
-# Stateless Functional Components
-
-When a class is stateless and doesn't have any methods i.e. only comprises the `render()` method, it can be changed for a stateless functional component, which doesn't bring any advantage in particular, although being wildly used by developers. The main difference is that `props` is used as a parameter instead:
-
-```jsx
-class MyClass extends Component {
-    render() {
-     	return (...);   
-    }
-}
-```
-
-is equivalent to:
-
-```jsx
-const MyClass = props => {   // props can be destructured in {its, keys}
-  return (...);
-};
-```
-
-or, using implicit return by using parenthesis instead of curly brackets:
-
-```react
-const MyClass = props => (
-	...
-);
-```
-
-Note that in the s.f.c. `props` is being passed as a parameter and, as such, will be used instead of `this.props`.
-
-`<MyClass name="Tiago" />` is the same as `{ MyClass( {name: "Tiago"} ) }`.
-
-
-
 # Advanced  Guides
 
 - #### Type checking with `PropTypes`
@@ -682,8 +495,6 @@ Builds forms with no need to all the repetitive boilerplate. Handles with:
 1. Getting values in and out of form state
 2. Validation and error messages
 3. Handling form submission
-
-Example:
 
 ```react
 import React from 'react'
@@ -739,7 +550,7 @@ render(<FormikApp />, document.getElementById('root'))
 
 ```
 
-`withFormik` is a higher order component that will inject the info in it inside the `App` component.
+`withFormik` is a HOC that will inject the info in it inside the `App` component.
 `mapPropsToValues` will convert the props injected in the `FormikApp` component to the `values` object, transmitted as the input of the `App` component. The `Field` component  sets its `value` attribute by connecting its `name` attribute with the key of `value`. Note that it was necessary to explicitly write, in the checkbox `Field`, `checked={values.newsletter}`. This was implicit in the precedent Fields, `value={values.__}`, since the keyword is `value` and not `checked`.
 `Form` spares us from writing `<form onSubmit={handleSubmit}>` and import the Formik built-in `handleSumbit` in the `App` component.
 `component="select"` is the way to make a dropdown menu using the `Field` component.
@@ -778,47 +589,175 @@ Widely used library, usually to handle with numbers.
 
 # Routing
 
-Routes are the different pages of a website. In React, Route is simply a component that accepts 2 attributes:  `path` and `component`. The special thing about the Route component is that it will return the component specified by the `component` attribute if the path specified in the url matches the one specified in the `path` attribute. If that's the case, the Component will be returned exactly where the Route component is located.
+Route returns its component if its path matches the url.
 
 1. `npm i react-router-dom` 	(`npm i react-router-native` for native apps)
 
-2. In `index.js`: `import { BrowserRouter } from 'react-router-dom';`
-
-3. Wrap the `<App />` component with the `<BrowserRouter>` component
-
-4. In the file where the routes are to be inserted: `import { Route } from 'react-router-dom';`
-
-5. Insert all the routes surrounded by a single `div `. The routes should look like this : 
-
-   `<Route path="/..." component={...} />`
-
-   + `path` - the extra url of the route;
-   + `component` - imported at the beginning of the script. 
-
-   `Route` evaluates if the path starts with what is being specified in the `path` attribute. As such, the home page ( `/` ) is always rendered. Solutions:
-
-   + add `exact`; or
-   + surround all the Route components with a `Switch` (imported from the `react-router-dom` library), which renders only the first match
+2. ```jsx
+   import {
+     BrowserRouter as Router,
+     Route,
+     Link
+   } from 'react-router-dom';
+   
+   const Home = () => <h2>Home</h2>;
+   const About = () => <h2>About</h2>;
+   const Contacts = () => <h2>Contacts</h2>;
+   
+   ReactDOM.render(
+     <Router>
+       
+       <nav>
+         <Link to="/">						Home			</Link>
+         <Link to="/about">			About			</Link>
+       	<Link to="/contacts">		Contacts	</Link>
+        </nav>
+   
+        <Switch>
+          <Route exact path="/">			<Home />				</Route>
+          <Route path="/about">			<About />				</Route>
+          <Route path="/contacts">		<Contacts />		</Route>
+        </Switch>
+   
+     </Router>,
+     document.getElementById('root')
+   );
+   ```
 
    
 
-   ## Redirect
+The next 2 scripts are equivalent:    
 
-   If random text is written after the `/`, the home page will be rendered, since it satisfies the condition of having `/`. It is desired to redirect to a ***Not Found*** page. For that, the `exact` attribute should be added to the `Route`  and after it `<Redirect to="/not-found" />` (imported from the *react-router-dom* library). right before the Home Route:  `<Route path="/not-found" component={NotFound} />`
+   ```jsx
+<Route path="/about">
+  <About />
+</Route>
+   ```
 
-   It is also possible to redirect from a specific url:   `<Redirect from='/messages' to='/inbox' />`
-
-   
-
-   If the links are inserted with regular anchors - `<a href=".">...</a>`, the whole web page will reload when these links are clicked, which is undesirable. The right approach is to use `<Link to=".">...</Link>` (Link imported from 'react-router-dom').
-
-   It is still necessary to add the links, which will be the `<Link to="...">` component instead of the `<a href="...">` tag. The only difference between the 2 is that the **Link** component will not reload the whole page, but just the necessary changes. In addition to the Link component, there is also the **NavLink**, which highlights in the browser the link that was pressed.
+```jsx
+<Route path="/about" component={ About } />
+```
 
 
 
-## Standard Route Props
+`<Link>` can be replaced by `<NavLink>` if the link is to be highlighted when active.
 
-There are 3 props standard props within a Route:
+To account for non-matching URIs:
+
+```jsx
+<Route path="/not-found" component={ NotFound } />
+<Route path="/" exact component={Home}></Route>
+<Redirect to="/not-found" />
+```
+
+It is also possible to redirect from a specific url: 
+
+```jsx
+<Redirect from='/messages' to='/inbox' />
+```
+
+
+
+## URL parameters
+
+```jsx
+const Child => () => {
+  let { id } = useParams(); // useParams returns an object with all the url variables
+  return <h3>ID: {id}</h3>;
+}
+
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useParams
+} from "react-router-dom";
+
+export default function ParamsExample() {
+  return (
+    <Router>
+      <nav>
+        <Link to="/a">A</Link>
+        <Link to="/b">B</Link>
+        <Link to="/c">C</Link>
+      </nav>
+
+      <Switch>
+        <Route path="/:id" children={<Child />} />
+      </Switch>
+    </Router>
+  );
+}
+```
+
+
+
+## [Nesting](https://reactrouter.com/web/example/nesting) - useRouteMatch
+
+
+
+```jsx
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useParams,
+  useRouteMatch
+} from "react-router-dom";
+
+const Home() => <h2>Home</h2>;
+
+const Topic = () => {
+  let { topicId } = useParams();
+  return <h3>{topicId}</h3>;
+}
+
+const Topics = () => {
+  let { path, url } = useRouteMatch(); // path relative to the parent route; url is a relative link
+  return (
+    <>
+      <h2>Topics</h2>
+    
+      <nav>
+        <Link to={`${url}/rendering`}>Rendering with React</Link>
+        <Link to={`${url}/components`}>Components</Link>
+        <Link to={`${url}/props-v-state`}>Props v. State</Link>
+			</nav>
+    
+      <Switch>
+        <Route exact path={path}> 	<h3>Select a topic...</h3> 		</Route>
+        <Route path={`${path}/:topicId`} component={ Topic } />
+      </Switch>
+    </>
+  );
+}
+
+export default function NestingExample() {
+  return (
+    <Router>
+      
+      <nav>
+      	<Link to="/">Home</Link>
+        <Link to="/topics">Topics</Link>
+      </nav>
+      
+      <Switch>
+      	<Route exact path="/" component={ Home } />
+        <Route path="/topics" component={ Topics } />
+      </Switch>
+      
+    </Router>
+  );
+}
+```
+
+
+
+**Props:**
 
 + **history**
   + `push`: `this.props.history.push('/home');` pushes the user to the specified route. This way, if the user goes back in the page, the previous page is gonna be displayed.
@@ -1107,7 +1046,15 @@ ReactDOMServer.renderToString(<App />);
 
 Hooks are a way that React implemented so that it would be possible to use all the time stateless functional components instead of components. SFC are advantageous when it comes to rendering speeds.
 
-## Equivalent of ComponentDidMount and ComponentWillUnmount 
+## useState
+
+## useEffect
+
+`useEffect(fn)`
+
+`fn` triggered every time the component containing it renders (including after first render). If `fn` returns a function, that function will be triggered when the component unmounts.
+
+ComponentDidMount, componentDidUpdate and ComponentWillUnmount in a single hook.
 
 ````react
 import{ useEffect } from react;
@@ -1121,6 +1068,52 @@ useEffect(()=>{
 ````
 
 `*` The second argument of `useEffect` is where we specify when we want it to be executed. `[]` specifies that it is just when the component mounts and unmounts.
+
+## useContext
+
+A context provider receives a single `value` prop:
+
+```jsx
+import { useEffect, createEffect } from 'react'
+const UserContext = createContext() 
+
+const App = () => {
+  return (
+    <MyContext.Provider value={42}>
+      <SomeComponent />
+    </MyContext.Provider>
+  )
+}
+```
+
+```js
+// SomeComponent.js
+const value = useContext(MyContext)
+```
+
+or
+
+```jsx
+<MyContext.Consumer>
+  { value => <p>{value}</p> }
+</MyContext.Consumer>
+```
+
+## useReducer
+
+## useCallback
+
+## useMemo
+
+## useRef
+
+## useImperativeHandle
+
+## useLayoutEffect
+
+## useDebugValue
+
+
 
 # element-react
 

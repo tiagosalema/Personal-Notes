@@ -69,6 +69,66 @@ If the data is already sorted:
    + Discard all the elements to its right otherwise.
 2. Repeat until the list is just one element.
 
+### Breadth-First Search
+
+Search for the closest path between 2 nodes by looping through all neighbors of one node first, inserting them on a queue, so that their neighbors are search after.
+
+**Pseudocode**
+
+```
+procedure BFS(G, start_v) is  
+  let Q be a queue
+  label start_v as discovered
+  Q.enqueue(start_v)
+  while Q is not empty do
+    v := Q.dequeue()
+    if v is the goal then
+      return v
+    for all edges from v to w in G.adjacentEdges(v) do
+      if w is not labeled as discovered then
+        label w as discovered
+        w.parent := v
+        Q.enqueue(w)
+```
+
++ **Input**: A graph *Graph* and a *starting vertex* *root* of *Graph*
++ **Output**: Goal state. The *parent* links trace the shortest path back to *root*
+
+### Depth-First Search
+
+Opposite strategy as breadth-first search. It explores the node branch as far as possible before being forced to backtrack and expand other nodes.
+
+**Pseudocode**
+
+<u>Recursive</u>
+
+```
+procedure DFS(G, v) is
+  label v as discovered
+  for all directed edges from v to w that are in G.adjacentEdges(v) do
+    if vertex w is not labeled as discovered then
+      recursively call DFS(G, w)
+```
+
+<u>Non-recursive</u>
+
+```
+procedure DFS-iterative(G, v) is
+  let S be a stack
+  S.push(v)
+  while S is not empty do
+    v = S.pop()
+    if v is not labeled as discovered then
+      label v as discovered
+      for all edges from v to w in G.adjacentEdges(v) do 
+        S.push(w)
+```
+
++ **Input**: A graph G and a vertex v of G
++ **Output**: All vertices reachable from v labeled as discovered
+
+
+
 ## Shortest path
 
 ### Dijkstra’s Algorithm
@@ -79,8 +139,8 @@ If the data is already sorted:
 
 ### A* Pathfinding Algorithm
 
-+ It's an enhancement of Dijkstra’s algorithm, but potentially more efficient.
-+ Better choice when we want to find the closest path between **2 particular vertices**.
++ Best to find best path between **2 particular vertices**.
++ Enhancement of Dijkstra’s algorithm, albeit potentially more efficient.
 + Ideally won't visit all vertices
 + Picks the most promising node based on heuristics i.e. a previous estimation of how far that node is to the destination node
 + The better the heuristics for all nodes, the faster the path is going to be found
@@ -88,6 +148,54 @@ If the data is already sorted:
 + Will always find a solution, if it exists
 
 [This](https://www.youtube.com/watch?v=eSOJ3ARN5FM&list=PLTd6ceoshprdS7HVI-Yus4rAHtrqNzH0j&index=22) video explains how to apply this algorithm.
+
+## String matching algorithms
+
+### Basic/Naive algorithm
+
+Will compare both pattern and string characters until they both match completely. Every time there's a mismatch, a new set of comparisons is started between the very first character of the pattern and the character after the first one on the previous string comparison.
+
+### KMP (Knuth-Morris-Pratt)
+
+Builds a table called π or lps (longest prefix [that matches a] sufix). For example:
+
+| **a** |  b   |  c   |  d   | <u>a</u> | <u>b</u> |  e   | <u>a</u> | <u>b</u> | f    |
+| :---: | :--: | :--: | :--: | :------: | :------: | :--: | :------: | :------: | ---- |
+|   0   |  0   |  0   |  0   |    1     |    2     |  0   |    1     |    2     | 0    |
+
+|  a   |  b   |  c   |  d   |  e   |  a   |  b   |  f   |  a   |  b   |  c   |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+|  0   |  0   |  0   |  0   |  0   |  1   |  2   |  0   |  1   |  2   |  3   |
+
+|  a   |  a   |  a   |  a   |  b   |  a   |  a   |  c   |  d   |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+|  0   |  1   |  2   |  3   |  0   |  1   |  2   |  0   |  0   |
+
+
+
+[How to apply this algorithm](https://youtu.be/V5-7GzOfADQ?t=750)
+
+### Rabin-Karp algorithm
+
+This algorithm numerically sums all the characters in the pattern and compares that sum with the one of sections of the reference string. This is benefitial because it is not necessary to compare each character, one by one. 
+
+To avoid unfortunate mismatches (technically called spurious hits) i.e. `if a=1, b=2, c=3 => ac ≡ bb ≡ 4` one can make a weighted sum `ac ≡ 10¹⋅1 + 10⁰⋅3 = 13 ≢ bb ≡ 10¹⋅2 + 10⁰⋅2 = 22`.
+
+The base of the formula was `10` in this example for simplicity. It should be as big as the number of characters that there are in both the pattern and reference string.
+
++ If all the characters (lowercase) ⇒ `26`,
++ lowercase + uppercase ⇒ `52`,
++ all algarisms ⇒ `10`
++ All of the above ⇒ `62`
++ With symbols ⇒ `Phew`
+
+This method can get get quite expensive, as seen in the last 2 examples of the above list. It can be the case that the resulting sum will be bigger than what the computer can deal with. In such cases, you might want to apply `mod` upon the obtained sum `sum % x`, where `x` is the maximum size of your data type. Be wary that mod might increase the amount of sporious hits.
+
+As a final note, it is not necessary to sum on each iteration over the reference string. It is only necessary to:
+
+1. subtract the weighted value of the first characther
+2. multiply the result of the subtration by the weight factor (so that each element gets an increased weight)
+3. add the next element
 
 # Data Structures
 
@@ -235,7 +343,21 @@ One main difference between functional programming (FP) and object-oriented prog
 
 In FP, on the other hand, abstraction is generally pushed as far as possible. Every problem is broken into a series of the simplest possible functions, which are then composed to build the problem solution. Identifying these abstractions is generally the most important part of problem resolution. In fact, FP programmers often spend more time trying to find what problem they should solve than solving them. And of course, it generally appears that these functions are the same from one problem to the next. Only the way they are composed is different. This is the reason why abstraction is one of the most valued techniques used by FP programmers.
 
-## FP
+### OOP
+
+#### ORMs
+
+Object-Relational Mapping is a programming technique for converting data between incompatible type systems using object-oriented programming languages. This creates, in effect, a "virtual object database" that can be used from within the programming language.
+
+Some NodeJS ORMs:
+
++ [Prisma](https://www.prisma.io/)
++ Sequelize
++ ORM2
++ Waterline
++ Bookshelf
+
+### FP
 
 A subset of declarative programming. Uses functions like `.map`, `.reduce` and `.filter`.
 
