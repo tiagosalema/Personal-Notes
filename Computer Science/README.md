@@ -294,6 +294,36 @@ Prime Sieves are algorithms that find all prime numbers lower than a given numbe
 5. Take the first number that isn't crossed out
 6. Go back to 3
 
+### Segmented sieve of Eratosthenes
+
+To determine the prime numbers within a given interval `[L,R]` ([reference](https://programmingpraxis.com/2010/02/05/segmented-sieve-of-eratosthenes/) - implementation not tested yet)
+
+1. `Primes_inf_sqrtR = [...]`
+
+2. For each prime, p, determine its equivalent, q:
+   `q = ( -1/2 (L + 1 + p) ) mod p` 
+   remembering that if the module `m = x mod y < y` => `m = y - m`
+
+3. `prime_bits = [1,1, ... , 1]` (length = R - L)
+
+4. ```js
+   primes.forEach((x,i) => {
+     for(let j = q[i]; j < prime_bits.length; j++) {
+       if(! (LR[j] % x) ) prime_bits[j] = 0;
+     }
+   })
+   ```
+
+5. `res = []`
+
+6. ```js
+   for(let i=0; i < prime_bits.length; i++) {
+     if(prime_bits[i]) res.push(LR[i])
+   }
+   ```
+
+7. `return res`
+
 ## Sieve of Sundaram
 
 1. i = 1
