@@ -10,6 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "jquery": "^3.4.1",
-    "liquidjs": "^8.5.1"
+    "liquidjs": "^10.0.0"
   }
 }
